@@ -4,7 +4,15 @@
 .aspero{
     image-rendering: pixelated;
 }
-canvas{
+#draw{
     max-width: 40%;
     min-width: 200px;
+}
+.flex{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+#drawR, #drawG, #drawB{
+    max-width: 30%;
 }

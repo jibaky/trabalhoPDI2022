@@ -1,1 +1,15 @@
-<canvas id='draw' #draw width='150' class='aspero'></canvas><br>
+<canvas id='draw' #draw width='150' class='aspero'></canvas>
+<mat-accordion>
+    <mat-expansion-panel [disabled]="!servico.isLoaded">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                clique para visualizar os canais de cores separados
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="flex">
+            <canvas matTooltip="canal vermelho" id='drawR' #drawR width='150' class='aspero'></canvas>
+            <canvas matTooltip="canal verde" id='drawG' #drawG width='150' class='aspero'></canvas>
+            <canvas matTooltip="canal azul" id='drawB' #drawB width='150' class='aspero'></canvas>
+        </div>
+    </mat-expansion-panel>
+</mat-accordion>

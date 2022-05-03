@@ -7,6 +7,9 @@ import { ImgUploadComponent } from './components/img-upload/img-upload.component
 import { VisualComponent } from './components/visual/visual.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatButtonModule} from '@angular/material/button';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatTooltipModule} from '@angular/material/tooltip';
+
 
 @NgModule({
   declarations: [
@@ -20,6 +23,8 @@ import {MatButtonModule} from '@angular/material/button';
     AppRoutingModule,
     BrowserAnimationsModule,
     MatButtonModule,
+    MatExpansionModule,
+    MatTooltipModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

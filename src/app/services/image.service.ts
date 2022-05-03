@@ -6,7 +6,7 @@ import { Imagem, Pixel } from '../models/image.model';
   providedIn: 'root'
 })
 export class ImageService {
-
+  public isLoaded: boolean = false;
   private pic: Imagem = new Imagem();
   /** observable da imagem original */
   public originalStream = new BehaviorSubject(null);
@@ -40,6 +40,7 @@ export class ImageService {
         //console.log(this.pic.pixels);
         this.originalStream.next(this.pic);
         this.pictureStream.next(this.pic);
+        this.isLoaded = true;
         resolve(true);
       };
       leitor.readAsText(arquivo);

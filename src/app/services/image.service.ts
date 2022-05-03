@@ -61,6 +61,10 @@ export class ImageService {
     }
     return pixels;
   }
+  public getValMax(){
+    if(!this.isLoaded) return 255;
+    else return this.pic.valMax;
+  }
   /**
    * função que inverte o valor dos pixels para deixar a imagem negativa
    */
@@ -70,6 +74,28 @@ export class ImageService {
       element.r = max-element.r;
       element.g = max-element.g;
       element.b = max-element.b;
+      return element;
+    });
+    this.pictureStream.next(this.pic);
+  }
+  public tornarCinza(){
+    this.pic.pixels = this.pic.pixels.map((element: Pixel)=>{
+      //const media = Math.floor((element.r + element.g + element.b)/3);
+      const media = Math.floor(0.299*element.r+0.587*element.g+0.114*element.b)
+      element.r = media;
+      element.g = media;
+      element.b = media;
+      return element;
+    });
+    this.pictureStream.next(this.pic);
+  }
+  public tornarPB(val: number){
+    this.pic.pixels = this.pic.pixels.map((element: Pixel)=>{
+      const media = Math.floor(0.299*element.r+0.587*element.g+0.114*element.b)
+      /** shorthand if sao perguntas sucedidas de ?(o valor caso seja verdade) e depois : (caso seja falso) */
+      element.r = media > val ? this.pic.valMax : 0;
+      element.g = media > val ? this.pic.valMax : 0;
+      element.b = media > val ? this.pic.valMax : 0;
       return element;
     });
     this.pictureStream.next(this.pic);

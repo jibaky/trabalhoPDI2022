@@ -1,4 +1,19 @@
 <div class="flex">
-    <app-img-upload></app-img-upload>
+    <div class="tools">
+        <app-img-upload></app-img-upload>
+        <h1></h1>
+        <button mat-button color="accent" (click)="negativar()" [disabled]="!servico.isLoaded">inverter cores</button>
+        <button mat-button color="accent" (click)="tornarCinza()" [disabled]="!servico.isLoaded">tornar cinza</button>
+        <br>
+        <button mat-button color="accent" (click)="tornarPB()" [disabled]="!servico.isLoaded">tornar preto e branco</button>
+        <mat-slider
+            [disabled]="!servico.isLoaded"
+            [min] = "0"
+            [max]= "servico.getValMax()"
+            [thumbLabel]="true"
+            color="accent"
+            [(value)]="limiarPB"
+        ></mat-slider>
+    </div>
     <app-visual></app-visual>
 </div>

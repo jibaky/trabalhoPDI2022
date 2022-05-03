@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ImageService } from 'src/app/services/image.service';
 
 @Component({
   selector: 'app-home',
@@ -7,7 +8,21 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+  constructor(public servico: ImageService) { }
+
+  limiarPB: number = 128;
+
+  negativar(){
+    this.servico.negativar();
+  }
+
+  tornarCinza(){
+    this.servico.tornarCinza();
+  }
+
+  tornarPB(){
+    this.servico.tornarPB(this.limiarPB);
+  }
 
   ngOnInit(): void {
   }

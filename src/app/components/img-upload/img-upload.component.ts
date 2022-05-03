@@ -29,9 +29,6 @@ export class ImgUploadComponent {
       context.fillRect(i%pic.largura, Math.floor(i/pic.largura), 1, 1);
     }
   }
-  negativar(){
-    this.servico.negativar();
-  }
   ngAfterViewInit(): void {
     this.servico.originalStream.pipe(
       filter((v)=> v != null)      

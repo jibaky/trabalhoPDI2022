@@ -9,6 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatButtonModule} from '@angular/material/button';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatSliderModule} from '@angular/material/slider';
 
 
 @NgModule({
@@ -25,6 +26,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
     MatButtonModule,
     MatExpansionModule,
     MatTooltipModule,
+    MatSliderModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

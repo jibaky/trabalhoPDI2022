@@ -1,3 +1,4 @@
+<h1>Trabalho PDI 2022</h1><br>
 <div class="flex">
     <div class="tools">
         <app-img-upload></app-img-upload>
@@ -14,6 +15,25 @@
             color="accent"
             [(value)]="limiarPB"
         ></mat-slider>
+        <br>
+        <button mat-button color="accent" (click)="equalizarHistograma()" [disabled]="!servico.isLoaded">equalizar histograma</button>
+        <div class="flex">
+            <div class="pixelBox">
+                <h3>RGB</h3>
+                <input id="R" size="1" [(value)]="textoR" #textR>
+                <input id="G" size="1" [(value)]="textoG" #textG>
+                <input id="B" size="1" [(value)]="textoB" #textB>
+                <button mat-button color="accent" (click)="converterRGB2HSL(textR.value, textG.value, textB.value)">converter rgb</button>
+            </div>
+            <div class="pixelBox">
+                <h3>HSL</h3>
+                <input id="H" size="1" [(value)]="textoH" #textH>
+                <input id="S" size="1" [(value)]="textoS" #textS>
+                <input id="L" size="1" [(value)]="textoL" #textL>
+                <button mat-button color="accent" (click)="converterHSL2RGB(textH.value, textS.value, textL.value)">converter hsl</button>
+            </div>
+        </div>
+        
     </div>
     <app-visual></app-visual>
 </div>

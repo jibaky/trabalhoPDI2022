@@ -11,6 +11,12 @@ export class HomeComponent implements OnInit {
   constructor(public servico: ImageService) { }
 
   limiarPB: number = 128;
+  textoR: any = 0;
+  textoG: any = 0;
+  textoB: any = 0;
+  textoH: any = 0;
+  textoS: any = 0;
+  textoL: any = 0;
 
   negativar(){
     this.servico.negativar();
@@ -23,8 +29,23 @@ export class HomeComponent implements OnInit {
   tornarPB(){
     this.servico.tornarPB(this.limiarPB);
   }
-
+  equalizarHistograma(){
+    this.servico.equalizarHistograma();
+  }
+  converterRGB2HSL(r, g, b){
+    let arr = this.servico.RGBtoHSL(r, g, b);
+    this.textoH = arr[0];
+    this.textoS = arr[1];
+    this.textoL = arr[2];
+  }
+  converterHSL2RGB(h, s, l){
+    let arr = this.servico.HSltoRGB(h, s, l);
+    this.textoR = arr[0];
+    this.textoG = arr[1];
+    this.textoB = arr[2];
+  }
   ngOnInit(): void {
   }
+  
 
 }

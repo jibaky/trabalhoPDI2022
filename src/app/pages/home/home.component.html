@@ -1,39 +1,75 @@
 <h1>Trabalho PDI 2022</h1><br>
 <div class="flex">
-    <div class="tools">
+    <div class="superTools">
         <app-img-upload></app-img-upload>
         <h1></h1>
-        <button mat-button color="accent" (click)="negativar()" [disabled]="!servico.isLoaded">inverter cores</button>
-        <button mat-button color="accent" (click)="tornarCinza()" [disabled]="!servico.isLoaded">tornar cinza</button>
-        <br>
-        <button mat-button color="accent" (click)="tornarPB()" [disabled]="!servico.isLoaded">tornar preto e branco</button>
-        <mat-slider
+        <button mat-raised-button color="accent" [matMenuTriggerFor]="functions" class="">funcoes</button>
+        <mat-menu #functions="matMenu">
+            <button mat-menu-item [matMenuTriggerFor]="func1">cor</button>
+            <button mat-menu-item [matMenuTriggerFor]="func2">calculos</button>
+            <button mat-menu-item [matMenuTriggerFor]="func3">ruidos</button>
+        </mat-menu>
+        
+        <mat-menu #func1="matMenu" class="centerBox">
+            <button mat-button color="accent" (click)="negativar()" [disabled]="!servico.isLoaded">inverter cores</button>
+            <br>
+            <button mat-button color="accent" (click)="tornarCinza()" [disabled]="!servico.isLoaded">tornar cinza</button>
+            <br>
+            <mat-slider
+                [disabled]="!servico.isLoaded"
+                [min] = "0"
+                [max]= "servico.getValMax()"
+                [thumbLabel]="true"
+                color="accent"
+                [(value)]="limiarPB"
+            ></mat-slider>
+            <button mat-button color="accent" (click)="tornarPB()" [disabled]="!servico.isLoaded">tornar preto e branco</button>
+        </mat-menu>
+
+        <mat-menu #func2="matMenu" class="centerBox">
+            <button mat-button color="accent" (click)="equalizarHistograma()" [disabled]="!servico.isLoaded">equalizar histograma</button>
+            <br>
+            <button mat-button color="accent" (click)="media()" [disabled]="!servico.isLoaded">media</button>
+            <br>
+            <button mat-button color="accent" (click)="mediana()" [disabled]="!servico.isLoaded">mediana</button>
+        </mat-menu>
+
+        <mat-menu #func3="matMenu" class="centerBox">
+            <mat-slider
             [disabled]="!servico.isLoaded"
             [min] = "0"
-            [max]= "servico.getValMax()"
+            [max]= "100"
             [thumbLabel]="true"
             color="accent"
-            [(value)]="limiarPB"
+            [(value)]="ruido"
         ></mat-slider>
-        <br>
-        <button mat-button color="accent" (click)="equalizarHistograma()" [disabled]="!servico.isLoaded">equalizar histograma</button>
-        <div class="flex">
-            <div class="pixelBox">
-                <h3>RGB</h3>
-                <input id="R" size="1" [(value)]="textoR" #textR>
-                <input id="G" size="1" [(value)]="textoG" #textG>
-                <input id="B" size="1" [(value)]="textoB" #textB>
-                <button mat-button color="accent" (click)="converterRGB2HSL(textR.value, textG.value, textB.value)">converter rgb</button>
-            </div>
-            <div class="pixelBox">
-                <h3>HSL</h3>
-                <input id="H" size="1" [(value)]="textoH" #textH>
-                <input id="S" size="1" [(value)]="textoS" #textS>
-                <input id="L" size="1" [(value)]="textoL" #textL>
-                <button mat-button color="accent" (click)="converterHSL2RGB(textH.value, textS.value, textL.value)">converter hsl</button>
+        
+        <button mat-button color="accent" (click)="ruidoPreto()" [disabled]="!servico.isLoaded">ruido preto</button>
+        
+        <button mat-button color="accent" (click)="ruidoBranco()" [disabled]="!servico.isLoaded">ruido branco</button>
+        
+        <button mat-button color="accent" (click)="saltPepper()" [disabled]="!servico.isLoaded">sal e pimenta</button>
+        </mat-menu>
+
+        <h1></h1>
+        <div class="tools">
+            <div class="flex">
+                <div class="centerBox">
+                    <h3>RGB</h3>
+                    <input id="R" size="1" [(value)]="textoR" #textR>
+                    <input id="G" size="1" [(value)]="textoG" #textG>
+                    <input id="B" size="1" [(value)]="textoB" #textB>
+                    <button mat-button color="accent" (click)="converterRGB2HSL(textR.value, textG.value, textB.value)">converter rgb</button>
+                </div>
+                <div class="centerBox">
+                    <h3>HSL</h3>
+                    <input id="H" size="1" [(value)]="textoH" #textH>
+                    <input id="S" size="1" [(value)]="textoS" #textS>
+                    <input id="L" size="1" [(value)]="textoL" #textL>
+                    <button mat-button color="accent" (click)="converterHSL2RGB(textH.value, textS.value, textL.value)">converter hsl</button>
+                </div>
             </div>
         </div>
-        
     </div>
     <app-visual></app-visual>
 </div>

@@ -10,6 +10,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatSliderModule} from '@angular/material/slider';
+import {MatMenuModule} from '@angular/material/menu';
 
 
 @NgModule({
@@ -27,6 +28,7 @@ import {MatSliderModule} from '@angular/material/slider';
     MatExpansionModule,
     MatTooltipModule,
     MatSliderModule,
+    MatMenuModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -11,6 +11,7 @@ export class HomeComponent implements OnInit {
   constructor(public servico: ImageService) { }
 
   limiarPB: number = 128;
+  ruido: number = 10;
   textoR: any = 0;
   textoG: any = 0;
   textoB: any = 0;
@@ -43,6 +44,21 @@ export class HomeComponent implements OnInit {
     this.textoR = arr[0];
     this.textoG = arr[1];
     this.textoB = arr[2];
+  }
+  media(){
+    this.servico.convolution3x3([1,1,1,1,1,1,1,1,1], 9, 0);
+  }
+  mediana(){
+    this.servico.convolution3x3([1,1,1,1,1,1,1,1,1], 9, 1);
+  }
+  ruidoPreto(){
+    this.servico.addRuido(this.ruido/100, 1, 0);
+  }
+  ruidoBranco(){
+    this.servico.addRuido(this.ruido/100, 0, 1);
+  }
+  saltPepper(){
+    this.servico.addRuido(this.ruido/100, 1, 1);
   }
   ngOnInit(): void {
   }

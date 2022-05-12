@@ -234,6 +234,22 @@ export class ImageService {
     }
     this.pictureStream.next(this.pic);
   }
+  private bubbleSort(arr, tam){
+    if (tam <= 1) return;
+    let acc, aux;
+    for(let i=1; i<tam; i++){
+      acc = 0;
+      for(let j=0; j<tam-i; j++){
+        if(arr[j]>arr[j+1]){
+          aux = arr[j];
+          arr[j] = arr[j+1];
+          arr[j+1] = aux;
+          acc++;
+        }
+      }
+      if(acc == 0) return;
+    }
+  }
   public convolution3x3(mask1, fator, isMediana){
     if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
     let mask2 = [0,0,0,0,0,0,0,0,0];
@@ -360,10 +376,10 @@ export class ImageService {
           //console.log('teste9F');
         }
         if(isMediana){
-          mask2.sort();
-          this.pic.pixels[index].r = Math.round(mask2[4]);
-          this.pic.pixels[index].g = Math.round(mask2[4]);
-          this.pic.pixels[index].b = Math.round(mask2[4]);
+          this.bubbleSort(mask2, mask2.length);
+          this.pic.pixels[index].r = mask2[4];
+          this.pic.pixels[index].g = mask2[4];
+          this.pic.pixels[index].b = mask2[4];
         }
         else{
           let value=0;

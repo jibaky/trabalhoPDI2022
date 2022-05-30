@@ -250,150 +250,169 @@ export class ImageService {
       if(acc == 0) return;
     }
   }
-  public convolution3x3(mask1, fator, isMediana){
+  public media(){
     if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
-    let mask2 = [0,0,0,0,0,0,0,0,0];
     let largura = this.pic.largura, altura = this.pic.altura;
-    for(let i=0; i<altura; i++){
+    for(let i=0; i<altura; i++)
       for(let j=0; j<largura; j++){
-        let index = i*largura+j;
-        //console.log(index);
-        if(index == 0){//canto superior esquerdo
-          //console.log('teste1', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+0);
-          mask2[0] = mask1[0] * this.pic.pixels[index].r;
-          mask2[1] = mask1[1] * this.pic.pixels[index].r;
-          mask2[2] = mask1[2] * this.pic.pixels[index+1].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index+1].r;
-          mask2[6] = mask1[6] * this.pic.pixels[(i+1)*largura+(j)].r;
-          mask2[7] = mask1[7] * this.pic.pixels[(i+1)*largura+(j)].r;
-          mask2[8] = mask1[8] * this.pic.pixels[(i+1)*largura+(j+1)].r;
-          //console.log('teste1F');
-        }
-        else if(index == largura-1){//canto superior direito
-          //console.log('teste2','index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(largura-1));
-          mask2[0] = mask1[0] * this.pic.pixels[index-1].r
-          mask2[1] = mask1[1] * this.pic.pixels[index].r;
-          mask2[2] = mask1[2] * this.pic.pixels[index].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index-1].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index].r;
-          mask2[6] = mask1[6] * this.pic.pixels[(i+1)*largura+(j-1)].r;
-          mask2[7] = mask1[7] * this.pic.pixels[(i+1)*largura+(j)].r;
-          mask2[8] = mask1[8] * this.pic.pixels[(i+1)*largura+(j)].r;
-          //console.log('teste2F');
-        }
-        else if(index == (altura-1)*largura){//canto inferior esquerdo
-          //console.log('teste3', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(altura-1)*largura);
-          mask2[0] = mask1[0] * this.pic.pixels[(i-1)*largura+(j)].r
-          mask2[1] = mask1[1] * this.pic.pixels[(i-1)*largura+(j)].r;
-          mask2[2] = mask1[2] * this.pic.pixels[(i-1)*largura+(j+1)].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index+1].r;
-          mask2[6] = mask1[6] * this.pic.pixels[index].r;
-          mask2[7] = mask1[7] * this.pic.pixels[index].r;
-          mask2[8] = mask1[8] * this.pic.pixels[index+1].r;
-          //console.log('teste3F');
-        }
-        else if(index == altura*largura-1){//canto inferior direito
-          //console.log('teste4', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(altura*largura-1));
-          mask2[0] = mask1[0] * this.pic.pixels[(i-1)*largura+(j-1)].r
-          mask2[1] = mask1[1] * this.pic.pixels[(i-1)*largura+(j)].r;
-          mask2[2] = mask1[2] * this.pic.pixels[(i-1)*largura+(j)].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index-1].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index].r;
-          mask2[6] = mask1[6] * this.pic.pixels[index-1].r;
-          mask2[7] = mask1[7] * this.pic.pixels[index].r;
-          mask2[8] = mask1[8] * this.pic.pixels[index].r;
-          //console.log('teste4F');
-        }
-        else if(index == i*largura){//borda esquerda
-          //console.log('teste5', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(i*largura));
-          mask2[0] = mask1[0] * this.pic.pixels[(i-1)*largura+(j)].r
-          mask2[1] = mask1[1] * this.pic.pixels[(i-1)*largura+(j)].r;
-          mask2[2] = mask1[2] * this.pic.pixels[(i-1)*largura+(j+1)].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index+1].r;
-          mask2[6] = mask1[6] * this.pic.pixels[(i+1)*largura+(j)].r;
-          mask2[7] = mask1[7] * this.pic.pixels[(i+1)*largura+(j)].r;
-          mask2[8] = mask1[8] * this.pic.pixels[(i+1)*largura+(j+1)].r;
-          //console.log('teste5F');
-        }
-        else if(index == (i+1)*largura-1){//borda direita
-          //console.log('teste6', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+((i+1)*largura-1));
-          mask2[0] = mask1[0] * this.pic.pixels[(i-1)*largura+(j-1)].r
-          mask2[1] = mask1[1] * this.pic.pixels[(i-1)*largura+(j)].r;
-          mask2[2] = mask1[2] * this.pic.pixels[(i-1)*largura+(j)].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index-1].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index].r;
-          mask2[6] = mask1[6] * this.pic.pixels[(i+1)*largura+(j-1)].r;
-          mask2[7] = mask1[7] * this.pic.pixels[(i+1)*largura+(j)].r;
-          mask2[8] = mask1[8] * this.pic.pixels[(i+1)*largura+(j)].r;
-          //console.log('teste6F');
-        }
-        else if(index < largura){//borda cima
-          //console.log('teste7', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '<'+largura);
-          mask2[0] = mask1[0] * this.pic.pixels[index-1].r
-          mask2[1] = mask1[1] * this.pic.pixels[index].r;
-          mask2[2] = mask1[2] * this.pic.pixels[index+1].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index-1].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index+1].r;
-          mask2[6] = mask1[6] * this.pic.pixels[(i+1)*largura+(j-1)].r;
-          mask2[7] = mask1[7] * this.pic.pixels[(i+1)*largura+(j)].r;
-          mask2[8] = mask1[8] * this.pic.pixels[(i+1)*largura+(j+1)].r;
-          //console.log('teste7F');
-        }
-        else if(index > (altura-1)*largura){//borda baixo
-          //console.log('teste8', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '>'+(altura-1)*largura);
-          mask2[0] = mask1[0] * this.pic.pixels[(i-1)*largura+(j-1)].r
-          mask2[1] = mask1[1] * this.pic.pixels[(i-1)*largura+j].r;
-          mask2[2] = mask1[2] * this.pic.pixels[(i-1)*largura+(j+1)].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index-1].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index+1].r;
-          mask2[6] = mask1[6] * this.pic.pixels[index-1].r;
-          mask2[7] = mask1[7] * this.pic.pixels[index].r;
-          mask2[8] = mask1[8] * this.pic.pixels[index+1].r;
-          //console.log('teste8F');
-        }
-        else{
-          //console.log('teste9', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura);
-          mask2[0] = mask1[0] * this.pic.pixels[(i-1)*largura+(j-1)].r
-          mask2[1] = mask1[1] * this.pic.pixels[(i-1)*largura+(j)].r;
-          mask2[2] = mask1[2] * this.pic.pixels[(i-1)*largura+(j+1)].r;
-          mask2[3] = mask1[3] * this.pic.pixels[index-1].r;
-          mask2[4] = mask1[4] * this.pic.pixels[index].r;
-          mask2[5] = mask1[5] * this.pic.pixels[index+1].r;
-          mask2[6] = mask1[6] * this.pic.pixels[(i+1)*largura+(j-1)].r;
-          mask2[7] = mask1[7] * this.pic.pixels[(i+1)*largura+(j)].r;
-          mask2[8] = mask1[8] * this.pic.pixels[(i+1)*largura+(j+1)].r;
-          //console.log('teste9F');
-        }
-        if(isMediana){
-          this.bubbleSort(mask2, mask2.length);
-          this.pic.pixels[index].r = mask2[4];
-          this.pic.pixels[index].g = mask2[4];
-          this.pic.pixels[index].b = mask2[4];
-        }
-        else{
-          let value=0;
-          for(let aux = 0; aux<9; aux++) value+=mask2[aux];
-          value = value/fator;
-          if(value<0) value = 0;
-          if(value>this.pic.valMax) value = this.pic.valMax;
-          //console.log(index, value, fator, value/fator);
-          this.pic.pixels[index].r = Math.round(value);
-          this.pic.pixels[index].g = Math.round(value);
-          this.pic.pixels[index].b = Math.round(value);
-        }
+        let  index = i*largura+j, value=0;
+        let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
+        for(let aux = 0; aux<9; aux++) value+=mask[aux];
+        value = value/9;
+        if(value<0) value = 0;
+        if(value>this.pic.valMax) value = this.pic.valMax;
+        //console.log(index, value);
+        this.pic.pixels[index].r = Math.round(value);
+        this.pic.pixels[index].g = Math.round(value);
+        this.pic.pixels[index].b = Math.round(value);
       }
+    this.pictureStream.next(this.pic);
+  }
+  public mediana(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j;
+        let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
+        this.bubbleSort(mask, mask.length);
+        this.pic.pixels[index].r = mask[4];
+        this.pic.pixels[index].g = mask[4];
+        this.pic.pixels[index].b = mask[4];
+      }
+    this.pictureStream.next(this.pic);
+  }
+  public sobel(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let magnitude = [], largura = this.pic.largura, altura = this.pic.altura, copiaX, copiaY;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j, valueX = 0, valueY = 0;
+        copiaX = this.calcVizinho3x3(i, j, index, [-1,0,1,-2,0,2,-1,0,1]);
+        copiaY = this.calcVizinho3x3(i, j, index, [-1,-2,-1,0,0,0,1,2,1]);
+        for(let aux = 0; aux<copiaX.length; aux++){
+          valueX += copiaX[aux];
+          valueY += copiaY[aux];
+        }
+        valueX = valueX/4;
+        valueY = valueY/4;
+        magnitude.push(Math.sqrt((valueX * valueX)+(valueY * valueY)));
+      }
+    let minmax = this.getMinMax(magnitude);
+    for(let i=0; i<magnitude.length; i++){
+      magnitude[i] = 255*((magnitude[i]-minmax[0])/(minmax[1]-minmax[0]));
+      this.pic.pixels[i].r = magnitude[i];
+      this.pic.pixels[i].g = magnitude[i];
+      this.pic.pixels[i].b = magnitude[i];
     }
     this.pictureStream.next(this.pic);
+  }
+  private getMinMax(arr){
+    let min =  9007199254740991, max = -9007199254740991;
+    for(let i = 0; i<arr.length; i++){
+      if(arr[i]<min) min = arr[i];
+      if(arr[i]>max) max = arr[i];
+    }
+    return [min, max]
+  }
+  private convol3x3(pixels, mask1){
+    let mask2 = [0,0,0,0,0,0,0,0,0];
+    mask2[0] = pixels[0] * mask1[0];
+    mask2[1] = pixels[1] * mask1[1];
+    mask2[2] = pixels[2] * mask1[2];
+    mask2[3] = pixels[3] * mask1[3];
+    mask2[4] = pixels[4] * mask1[4];
+    mask2[5] = pixels[5] * mask1[5];
+    mask2[6] = pixels[6] * mask1[6];
+    mask2[7] = pixels[7] * mask1[7];
+    mask2[8] = pixels[8] * mask1[8];
+    return mask2;
+  }
+  private calcVizinho3x3(i, j, index, mask1){
+    let mask2 ;
+    let largura = this.pic.largura, altura = this.pic.altura;
+    //console.log(index);
+    if(index == 0){//canto superior esquerdo
+      //console.log('teste1', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+0);
+      mask2 = this.convol3x3([
+        this.pic.pixels[index].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r, 
+        this.pic.pixels[index].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r, 
+        this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j+1)].r], 
+        mask1);
+      //console.log('teste1F');
+    }
+    else if(index == largura-1){//canto superior direito
+      //console.log('teste2','index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(largura-1));
+      mask2 = this.convol3x3([
+        this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index].r,
+        this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index].r,
+        this.pic.pixels[(i+1)*largura+(j-1)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j)].r],
+        mask1);
+      //console.log('teste2F');
+    }
+    else if(index == (altura-1)*largura){//canto inferior esquerdo
+      //console.log('teste3', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(altura-1)*largura);
+      mask2 = this.convol3x3([
+        this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,
+        this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,
+        this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r],
+        mask1);
+      //console.log('teste3F');
+    }
+    else if(index == altura*largura-1){//canto inferior direito
+      //console.log('teste4', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(altura*largura-1));
+      mask2 = this.convol3x3([
+        this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,
+        this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+        this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r],
+        mask1);
+      //console.log('teste4F');
+    }
+    else if(index == i*largura){//borda esquerda
+      //console.log('teste5', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(i*largura));
+      mask2 = this.convol3x3([
+        this.pic.pixels[(i-1)*largura+(j)].r, this.pic.pixels[(i-1)*largura+(j)].r, this.pic.pixels[(i-1)*largura+(j+1)].r,
+        this.pic.pixels[index].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
+        this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j+1)].r],
+        mask1);
+      //console.log('teste5F');
+    }
+    else if(index == (i+1)*largura-1){//borda direita
+      //console.log('teste6', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+((i+1)*largura-1));
+      mask2 = this.convol3x3([
+        this.pic.pixels[(i-1)*largura+(j-1)].r, this.pic.pixels[(i-1)*largura+(j)].r, this.pic.pixels[(i-1)*largura+(j)].r,
+        this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index].r,
+        this.pic.pixels[(i+1)*largura+(j-1)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j)].r],
+        mask1);
+      //console.log('teste6F');
+    }
+    else if(index < largura){//borda cima
+      //console.log('teste7', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '<'+largura);
+      mask2 = this.convol3x3([
+        this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
+        this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
+        this.pic.pixels[(i+1)*largura+(j-1)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j+1)].r],
+        mask1);
+      //console.log('teste7F');
+    }
+    else if(index > (altura-1)*largura){//borda baixo
+      //console.log('teste8', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '>'+(altura-1)*largura);
+      mask2 = this.convol3x3([
+        this.pic.pixels[(i-1)*largura+(j-1)].r, this.pic.pixels[(i-1)*largura+j].r, this.pic.pixels[(i-1)*largura+(j+1)].r,
+        this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
+        this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r],
+        mask1);
+      //console.log('teste8F');
+    }
+    else{
+      //console.log('teste9', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura);
+      mask2 = this.convol3x3([
+        this.pic.pixels[(i-1)*largura+(j-1)].r, this.pic.pixels[(i-1)*largura+(j)].r, this.pic.pixels[(i-1)*largura+(j+1)].r,
+        this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
+        this.pic.pixels[(i+1)*largura+(j-1)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j+1)].r],
+        mask1);
+      //console.log('teste9F');
+    }
+    return mask2;
   }
 }

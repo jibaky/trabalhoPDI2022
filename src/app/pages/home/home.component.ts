@@ -46,10 +46,13 @@ export class HomeComponent implements OnInit {
     this.textoB = arr[2];
   }
   media(){
-    this.servico.convolution3x3([1,1,1,1,1,1,1,1,1], 9, 0);
+    this.servico.media();
   }
   mediana(){
-    this.servico.convolution3x3([1,1,1,1,1,1,1,1,1], 9, 1);
+    this.servico.mediana();
+  }
+  sobel(){
+    this.servico.sobel();
   }
   ruidoPreto(){
     this.servico.addRuido(this.ruido/100, 1, 0);

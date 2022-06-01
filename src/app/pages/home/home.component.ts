@@ -19,6 +19,10 @@ export class HomeComponent implements OnInit {
   textoS: any = 0;
   textoL: any = 0;
 
+  undo(){
+    this.servico.undo();
+  }
+
   negativar(){
     this.servico.negativar();
   }
@@ -30,39 +34,49 @@ export class HomeComponent implements OnInit {
   tornarPB(){
     this.servico.tornarPB(this.limiarPB);
   }
+
   equalizarHistograma(){
     this.servico.equalizarHistograma();
   }
+
   converterRGB2HSL(r, g, b){
     let arr = this.servico.RGBtoHSL(r, g, b);
     this.textoH = arr[0];
     this.textoS = arr[1];
     this.textoL = arr[2];
   }
+
   converterHSL2RGB(h, s, l){
     let arr = this.servico.HSltoRGB(h, s, l);
     this.textoR = arr[0];
     this.textoG = arr[1];
     this.textoB = arr[2];
   }
+
   media(){
     this.servico.media();
   }
+
   mediana(){
     this.servico.mediana();
   }
+
   sobel(){
     this.servico.sobel();
   }
+
   ruidoPreto(){
     this.servico.addRuido(this.ruido/100, 1, 0);
   }
+
   ruidoBranco(){
     this.servico.addRuido(this.ruido/100, 0, 1);
   }
+
   saltPepper(){
     this.servico.addRuido(this.ruido/100, 1, 1);
   }
+
   ngOnInit(): void {
   }
   

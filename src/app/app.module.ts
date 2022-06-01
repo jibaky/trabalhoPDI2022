@@ -11,6 +11,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatMenuModule} from '@angular/material/menu';
+import {MatIconModule} from '@angular/material/icon';
+
 
 
 @NgModule({
@@ -29,6 +31,7 @@ import {MatMenuModule} from '@angular/material/menu';
     MatTooltipModule,
     MatSliderModule,
     MatMenuModule,
+    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

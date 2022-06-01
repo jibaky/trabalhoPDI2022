@@ -7,7 +7,9 @@ import { Imagem, Pixel } from '../models/image.model';
 })
 export class ImageService {
   public isLoaded: boolean = false;
+  public canUndo: boolean = false;
   private pic: Imagem = new Imagem();
+  private pic2: Imagem = new Imagem();
   /** observable da imagem original */
   public originalStream = new BehaviorSubject(null);
   /** observable da imagem com alterações */
@@ -22,6 +24,7 @@ export class ImageService {
       leitor.onloadend=(e)=>{
         const arrDados = String(leitor.result).split('\n');
         this.pic.tipo = arrDados[0];
+        this.pic2.tipo = this.pic.tipo;
         const d = arrDados[1].split(' ');
         let inicioPixels = 3;
         if(d.length == 1) {
@@ -35,8 +38,17 @@ export class ImageService {
           this.pic.altura = Number(d[1]);
           this.pic.valMax = Number(arrDados[2]);
         }
-        if(this.pic.tipo == 'P2') this.pic.pixels = this.loadPGM(arrDados, inicioPixels);
-        if(this.pic.tipo == 'P3') this.pic.pixels = this.loadPPM(arrDados, inicioPixels);
+        this.pic2.largura = this.pic.largura;
+        this.pic2.altura = this.pic.altura;
+        this.pic2.valMax = this.pic.valMax;
+        if(this.pic.tipo == 'P2') {
+          this.pic.pixels = this.loadPGM(arrDados, inicioPixels);
+          this.pic2.pixels = this.loadPGM(arrDados, inicioPixels);
+        }
+        if(this.pic.tipo == 'P3') {
+          this.pic.pixels = this.loadPPM(arrDados, inicioPixels);
+          this.pic2.pixels = this.loadPPM(arrDados, inicioPixels);
+        }
         //console.log(this.pic.pixels);
         this.originalStream.next(this.pic);
         this.pictureStream.next(this.pic);
@@ -65,41 +77,59 @@ export class ImageService {
     if(!this.isLoaded) return 255;
     else return this.pic.valMax;
   }
+  public undo(){
+    for(let i=0; i<this.pic.pixels.length; i++){
+      this.pic.pixels[i].r = this.pic2.pixels[i].r;
+      this.pic.pixels[i].g = this.pic2.pixels[i].g;
+      this.pic.pixels[i].b = this.pic2.pixels[i].b;
+    }
+    this.canUndo = false;
+    this.pictureStream.next(this.pic);
+  }
   /**
    * função que inverte o valor dos pixels para deixar a imagem negativa
    */
   public negativar(){
-    this.pic.pixels = this.pic.pixels.map((element: Pixel)=>{
+    for(let i=0; i<this.pic.pixels.length; i++){
       const max = this.pic.valMax;
-      element.r = max-element.r;
-      element.g = max-element.g;
-      element.b = max-element.b;
-      return element;
-    });
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = max-this.pic.pixels[i].r;
+      this.pic.pixels[i].g = max-this.pic.pixels[i].g;
+      this.pic.pixels[i].b = max-this.pic.pixels[i].b;
+    }
+    this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   public tornarCinza(){
     if(this.pic.tipo == "P2") return;
-    this.pic.pixels = this.pic.pixels.map((element: Pixel)=>{
+    for(let i=0; i<this.pic.pixels.length; i++){
       //const media = Math.floor((element.r + element.g + element.b)/3);
-      const media = Math.floor(0.299*element.r+0.587*element.g+0.114*element.b)
-      element.r = media;
-      element.g = media;
-      element.b = media;
-      return element;
-    });
+      const media = Math.floor(0.299*this.pic.pixels[i].r+0.587*this.pic.pixels[i].g+0.114*this.pic.pixels[i].b)
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = media;
+      this.pic.pixels[i].g = media;
+      this.pic.pixels[i].b = media;
+    }
     this.pic.tipo = "P2"
+    this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   public tornarPB(val: number){
-    this.pic.pixels = this.pic.pixels.map((element: Pixel)=>{
-      const media = Math.floor(0.299*element.r+0.587*element.g+0.114*element.b)
+    for(let i=0; i<this.pic.pixels.length; i++){
+      const media = Math.floor(0.299*this.pic.pixels[i].r+0.587*this.pic.pixels[i].g+0.114*this.pic.pixels[i].b)
       /** shorthand if sao perguntas sucedidas de ?(o valor caso seja verdade) e depois : (caso seja falso) */
-      element.r = media > val ? this.pic.valMax : 0;
-      element.g = media > val ? this.pic.valMax : 0;
-      element.b = media > val ? this.pic.valMax : 0;
-      return element;
-    });
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = media > val ? this.pic.valMax : 0;
+      this.pic.pixels[i].g = media > val ? this.pic.valMax : 0;
+      this.pic.pixels[i].b = media > val ? this.pic.valMax : 0;
+    }
+    this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   private getHistograma(){
@@ -151,6 +181,9 @@ export class ImageService {
     if(this.pic.tipo == "P2"){
       let fEq = this.eqFreq();
       for(let i=0; i<this.pic.pixels.length; i++){
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
         this.pic.pixels[i].r = fEq[this.pic.pixels[i].r];
         this.pic.pixels[i].g = fEq[this.pic.pixels[i].g];
         this.pic.pixels[i].b = fEq[this.pic.pixels[i].b];
@@ -162,6 +195,7 @@ export class ImageService {
       for(let i=0; i<this.pic.pixels.length; i++) this.pic.pixels[i].b = fEq[this.pic.pixels[i].b];
       this.pixelsToRGB();
     }
+    this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   public RGBtoHSL(r, g, b){
@@ -218,6 +252,11 @@ export class ImageService {
     return [Math.round(r*255), Math.round(g*255), Math.round(b*255)]
   }
   public addRuido(qtd, b, w){
+    for(let i=0; i < this.pic.pixels.length; i++){
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+    }
     let cor;
     qtd = Math.round(qtd * this.pic.pixels.length);
     for(let i=0; i < qtd; i++){
@@ -232,6 +271,7 @@ export class ImageService {
       this.pic.pixels[index].g = cor;
       this.pic.pixels[index].b = cor;
     }
+    this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   private bubbleSort(arr, tam){
@@ -262,10 +302,14 @@ export class ImageService {
         if(value<0) value = 0;
         if(value>this.pic.valMax) value = this.pic.valMax;
         //console.log(index, value);
+        this.pic2.pixels[index].r = this.pic.pixels[index].r;
+        this.pic2.pixels[index].g = this.pic.pixels[index].g;
+        this.pic2.pixels[index].b = this.pic.pixels[index].b;
         this.pic.pixels[index].r = Math.round(value);
         this.pic.pixels[index].g = Math.round(value);
         this.pic.pixels[index].b = Math.round(value);
       }
+    this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   public mediana(){
@@ -276,10 +320,14 @@ export class ImageService {
         let  index = i*largura+j;
         let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
         this.bubbleSort(mask, mask.length);
+        this.pic2.pixels[index].r = this.pic.pixels[index].r;
+        this.pic2.pixels[index].g = this.pic.pixels[index].g;
+        this.pic2.pixels[index].b = this.pic.pixels[index].b;
         this.pic.pixels[index].r = mask[4];
         this.pic.pixels[index].g = mask[4];
         this.pic.pixels[index].b = mask[4];
       }
+    this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   public sobel(){
@@ -301,10 +349,14 @@ export class ImageService {
     let minmax = this.getMinMax(magnitude);
     for(let i=0; i<magnitude.length; i++){
       magnitude[i] = 255*((magnitude[i]-minmax[0])/(minmax[1]-minmax[0]));
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
       this.pic.pixels[i].r = magnitude[i];
       this.pic.pixels[i].g = magnitude[i];
       this.pic.pixels[i].b = magnitude[i];
     }
+    this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   private getMinMax(arr){

@@ -3,7 +3,10 @@
     <div class="superTools">
         <app-img-upload></app-img-upload>
         <h1></h1>
-        <button mat-raised-button color="accent" [matMenuTriggerFor]="functions" class="">funcoes</button>
+        <div class="flex">
+            <button mat-stroked-button style="margin-right: 16px;" color="accent" (click)="undo()"  [disabled]="!this.servico.canUndo"><mat-icon>undo</mat-icon></button>
+            <button mat-raised-button color="accent" [matMenuTriggerFor]="functions" class="">funcoes</button>
+        </div>
         <mat-menu #functions="matMenu">
             <button mat-menu-item [matMenuTriggerFor]="func1">cor</button>
             <button mat-menu-item [matMenuTriggerFor]="func2">calculos</button>

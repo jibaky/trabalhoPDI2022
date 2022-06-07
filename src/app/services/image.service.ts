@@ -8,6 +8,9 @@ import { Imagem, Pixel } from '../models/image.model';
 export class ImageService {
   public isLoaded: boolean = false;
   public canUndo: boolean = false;
+  public magnitude = [];
+  public gX: any = [];
+  public gY: any = [];
   private pic: Imagem = new Imagem();
   private pic2: Imagem = new Imagem();
   /** observable da imagem original */
@@ -16,6 +19,24 @@ export class ImageService {
   public pictureStream = new BehaviorSubject(null);
 
   constructor() { }
+
+  public getValMax(){
+    if(!this.isLoaded) return 255;
+    else return this.pic.valMax;
+  }
+
+  public getAltura(){
+    return this.pic.altura;
+  }
+
+  public getLargura(){
+    return this.pic.largura;
+  }
+
+  public getSobel(x,y){
+    const largura = this.pic.largura, index = y*largura+x;
+    return [this.magnitude[index], this.gX[index], this.gY[index]];
+  }
 
   upload(arquivo: File): Promise<boolean>{
     return new Promise((resolve, reject)=>{
@@ -64,6 +85,9 @@ export class ImageService {
     for(let i = offset; i<dados.length; i++){
       if(dados[i]!=="")pixels.push(new Pixel(Number(dados[i])));
     }
+    this.magnitude = [];
+    this.gX = [];
+    this.gY = [];
     return pixels;
   }
   private loadPPM(dados: Array<String>, offset: number): Pixel[]{
@@ -71,11 +95,10 @@ export class ImageService {
     for(let i = offset; i<dados.length; i=i+3){
       if(dados[i]!=="")pixels.push(new Pixel(Number(dados[i]), Number(dados[i+1]), Number(dados[i+2])));
     }
+    this.magnitude = [];
+    this.gX = [];
+    this.gY = [];
     return pixels;
-  }
-  public getValMax(){
-    if(!this.isLoaded) return 255;
-    else return this.pic.valMax;
   }
   public undo(){
     for(let i=0; i<this.pic.pixels.length; i++){
@@ -118,16 +141,30 @@ export class ImageService {
     this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
-  public tornarPB(val: number){
+  public limiarizacao(val: number){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens cinza, do tipo .pgm");
     for(let i=0; i<this.pic.pixels.length; i++){
-      const media = Math.floor(0.299*this.pic.pixels[i].r+0.587*this.pic.pixels[i].g+0.114*this.pic.pixels[i].b)
-      /** shorthand if sao perguntas sucedidas de ?(o valor caso seja verdade) e depois : (caso seja falso) */
       this.pic2.pixels[i].r = this.pic.pixels[i].r;
       this.pic2.pixels[i].g = this.pic.pixels[i].g;
       this.pic2.pixels[i].b = this.pic.pixels[i].b;
-      this.pic.pixels[i].r = media > val ? this.pic.valMax : 0;
-      this.pic.pixels[i].g = media > val ? this.pic.valMax : 0;
-      this.pic.pixels[i].b = media > val ? this.pic.valMax : 0;
+      /** shorthand if sao perguntas sucedidas de ?(o valor caso seja verdade) e depois : (caso seja falso) */
+      this.pic.pixels[i].r = this.pic.pixels[i].r >= val ? this.pic.pixels[i].r : 0;
+      this.pic.pixels[i].g = this.pic.pixels[i].g >= val ? this.pic.pixels[i].g : 0;
+      this.pic.pixels[i].b = this.pic.pixels[i].b >= val ? this.pic.pixels[i].b : 0;
+    }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+  public binarizacao(val: number){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens cinza, do tipo .pgm");
+    for(let i=0; i<this.pic.pixels.length; i++){
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      /** shorthand if sao perguntas sucedidas de ?(o valor caso seja verdade) e depois : (caso seja falso) */
+      this.pic.pixels[i].r = this.pic.pixels[i].r >= val ? this.pic.valMax : 0;
+      this.pic.pixels[i].g = this.pic.pixels[i].g >= val ? this.pic.valMax : 0;
+      this.pic.pixels[i].b = this.pic.pixels[i].b >= val ? this.pic.valMax : 0;
     }
     this.canUndo = true;
     this.pictureStream.next(this.pic);
@@ -333,6 +370,9 @@ export class ImageService {
   public sobel(){
     if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
     let magnitude = [], largura = this.pic.largura, altura = this.pic.altura, copiaX, copiaY;
+    this.magnitude = [];
+    this.gX = [];
+    this.gY = [];
     for(let i=0; i<altura; i++)
       for(let j=0; j<largura; j++){
         let  index = i*largura+j, valueX = 0, valueY = 0;
@@ -344,6 +384,8 @@ export class ImageService {
         }
         valueX = valueX/4;
         valueY = valueY/4;
+        this.gX.push(valueX);
+        this.gY.push(valueY);
         magnitude.push(Math.sqrt((valueX * valueX)+(valueY * valueY)));
       }
     let minmax = this.getMinMax(magnitude);
@@ -356,6 +398,7 @@ export class ImageService {
       this.pic.pixels[i].g = magnitude[i];
       this.pic.pixels[i].b = magnitude[i];
     }
+    this.magnitude = magnitude;
     this.canUndo = true;
     this.pictureStream.next(this.pic);
   }

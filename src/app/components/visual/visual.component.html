@@ -13,3 +13,49 @@
         </div>
     </mat-expansion-panel>
 </mat-accordion>
+<br>
+<mat-accordion>
+    <mat-expansion-panel [disabled]="!servico.isLoaded">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                clique para visualizar informações sobre o pixel clicado
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="flex">
+            <div class="centerBox">
+                <h3>RGB</h3>
+                <!-- <input id="R" size="1" [(value)]="textoR" #textR>
+                <input id="G" size="1" [(value)]="textoG" #textG>
+                <input id="B" size="1" [(value)]="textoB" #textB> -->
+                R = {{textoR}}<br>
+                G = {{textoG}}<br>
+                B = {{textoB}}
+            </div>
+            <div class="centerBox">
+                <h3>HSL</h3>
+                <!-- <input id="H" size="1" [(value)]="textoH" #textH>
+                <input id="S" size="1" [(value)]="textoS" #textS>
+                <input id="L" size="1" [(value)]="textoL" #textL> -->
+                H = {{textoH}}<br>
+                S = {{textoS}}<br>
+                L = {{textoL}}
+            </div>
+            <div class="centerBox">
+                <h3>[X,Y]</h3>
+                <!-- <input id="X" size="3" [(value)]="textoX" #textX>
+                <input id="Y" size="3" [(value)]="textoY" #textS> -->
+                X = {{textoX}}<br>
+                Y = {{textoY}}
+            </div>
+            <div class="centerBox">
+                <h3>SOBEL</h3>
+                <!-- <input id="sobelM" size="5" [(value)]="textoSobelM" >
+                <input id="sobelX" size="5" [(value)]="textoSobelX" >
+                <input id="sobelY" size="5" [(value)]="textoSobelY" > -->
+                magnitude: {{textoSobelM}}<br>
+                gx = {{textoSobelX}}<br>
+                gy = {{textoSobelY}}
+            </div>
+        </div>
+    </mat-expansion-panel>
+</mat-accordion>

@@ -10,34 +10,14 @@ export class HomeComponent implements OnInit {
 
   constructor(public servico: ImageService) { }
 
-  limiarPB: number = 128;
-  ruido: number = 10;
   textoR: any = 0;
   textoG: any = 0;
   textoB: any = 0;
   textoH: any = 0;
   textoS: any = 0;
   textoL: any = 0;
-
-  undo(){
-    this.servico.undo();
-  }
-
-  negativar(){
-    this.servico.negativar();
-  }
-
-  tornarCinza(){
-    this.servico.tornarCinza();
-  }
-
-  tornarPB(){
-    this.servico.tornarPB(this.limiarPB);
-  }
-
-  equalizarHistograma(){
-    this.servico.equalizarHistograma();
-  }
+  limiar: number = 128;
+  ruido: number = 10;
 
   converterRGB2HSL(r, g, b){
     let arr = this.servico.RGBtoHSL(r, g, b);
@@ -51,6 +31,30 @@ export class HomeComponent implements OnInit {
     this.textoR = arr[0];
     this.textoG = arr[1];
     this.textoB = arr[2];
+  }
+  
+  undo(){
+    this.servico.undo();
+  }
+
+  negativar(){
+    this.servico.negativar();
+  }
+
+  tornarCinza(){
+    this.servico.tornarCinza();
+  }
+
+  binarizacao(){
+    this.servico.binarizacao(this.limiar);
+  }
+
+  limiarizacao(){
+    this.servico.limiarizacao(this.limiar);
+  }
+
+  equalizarHistograma(){
+    this.servico.equalizarHistograma();
   }
 
   media(){

@@ -5,18 +5,18 @@
         <h1></h1>
         <div class="flex">
             <button mat-stroked-button style="margin-right: 16px;" color="accent" (click)="undo()"  [disabled]="!this.servico.canUndo"><mat-icon>undo</mat-icon></button>
-            <button mat-raised-button color="accent" [matMenuTriggerFor]="functions" class="">funcoes</button>
+            <button mat-raised-button color="accent" [matMenuTriggerFor]="functions" class="">Funções</button>
         </div>
         <mat-menu #functions="matMenu">
-            <button mat-menu-item [matMenuTriggerFor]="func1">cor</button>
-            <button mat-menu-item [matMenuTriggerFor]="func2">calculos</button>
-            <button mat-menu-item [matMenuTriggerFor]="func3">ruidos</button>
+            <button mat-menu-item [matMenuTriggerFor]="func1">Cor</button>
+            <button mat-menu-item [matMenuTriggerFor]="func2">Calculos</button>
+            <button mat-menu-item [matMenuTriggerFor]="func3">Ruídos</button>
         </mat-menu>
         
         <mat-menu #func1="matMenu" class="centerBox">
-            <button mat-button color="accent" (click)="negativar()" [disabled]="!servico.isLoaded">inverter cores</button>
+            <button mat-button color="accent" (click)="negativar()" [disabled]="!servico.isLoaded">Inverter cores</button>
             <br>
-            <button mat-button color="accent" (click)="tornarCinza()" [disabled]="!servico.isLoaded">tornar cinza</button>
+            <button mat-button color="accent" (click)="tornarCinza()" [disabled]="!servico.isLoaded">Tornar cinza</button>
             <br>
             <mat-slider
                 [disabled]="!servico.isLoaded"
@@ -24,19 +24,20 @@
                 [max]= "servico.getValMax()"
                 [thumbLabel]="true"
                 color="accent"
-                [(value)]="limiarPB"
+                [(value)]="limiar"
             ></mat-slider>
-            <button mat-button color="accent" (click)="tornarPB()" [disabled]="!servico.isLoaded">tornar preto e branco</button>
+            <button mat-button color="accent" (click)="binarizacao()" [disabled]="!servico.isLoaded">Binarização</button>
+            <button mat-button color="accent" (click)="limiarizacao()" [disabled]="!servico.isLoaded">Limiarização</button>
         </mat-menu>
 
         <mat-menu #func2="matMenu" class="centerBox">
-            <button mat-button color="accent" (click)="equalizarHistograma()" [disabled]="!servico.isLoaded">equalizar histograma</button>
+            <button mat-button color="accent" (click)="equalizarHistograma()" [disabled]="!servico.isLoaded">Equalizar histograma</button>
             <br>
-            <button mat-button color="accent" (click)="media()" [disabled]="!servico.isLoaded">media</button>
+            <button mat-button color="accent" (click)="media()" [disabled]="!servico.isLoaded">Media</button>
             <br>
-            <button mat-button color="accent" (click)="mediana()" [disabled]="!servico.isLoaded">mediana</button>
+            <button mat-button color="accent" (click)="mediana()" [disabled]="!servico.isLoaded">Mediana</button>
             <br>
-            <button mat-button color="accent" (click)="sobel()" [disabled]="!servico.isLoaded">sobel</button>
+            <button mat-button color="accent" (click)="sobel()" [disabled]="!servico.isLoaded">Sobel</button>
         </mat-menu>
 
         <mat-menu #func3="matMenu" class="centerBox">
@@ -49,14 +50,18 @@
             [(value)]="ruido"
         ></mat-slider>
         
-        <button mat-button color="accent" (click)="ruidoPreto()" [disabled]="!servico.isLoaded">ruido preto</button>
+        <button mat-button color="accent" (click)="ruidoPreto()" [disabled]="!servico.isLoaded">Ruído preto</button>
         
-        <button mat-button color="accent" (click)="ruidoBranco()" [disabled]="!servico.isLoaded">ruido branco</button>
+        <button mat-button color="accent" (click)="ruidoBranco()" [disabled]="!servico.isLoaded">Ruído branco</button>
         
-        <button mat-button color="accent" (click)="saltPepper()" [disabled]="!servico.isLoaded">sal e pimenta</button>
+        <button mat-button color="accent" (click)="saltPepper()" [disabled]="!servico.isLoaded">Sal e pimenta</button>
         </mat-menu>
 
         <h1></h1>
+        <a href="https://drive.google.com/drive/u/0/folders/1z9NXFhD-Ui1euSg91UHql3M6TMCIIfGE" target="_blank" button mat-stroked-button color="accent">
+            PGMs de exemplo
+            <mat-icon>exit_to_app</mat-icon>
+        </a>
         <div class="tools">
             <div class="flex">
                 <div class="centerBox">

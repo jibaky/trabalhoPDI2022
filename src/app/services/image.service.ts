@@ -20,6 +20,23 @@ export class ImageService {
 
   constructor() { }
 
+  public getNewPic(){
+    let arr = [this.pic.tipo+'\n'+this.pic.largura+' '+this.pic.altura+'\n'+this.pic.valMax]
+    if(this.pic.tipo == 'P2'){
+      for(let i = 0; i<this.pic.pixels.length; i++){
+        arr = arr.concat('\n'+this.pic.pixels[i].r);
+      }
+      let file = new File(arr, 'newPic.pgm', {type: 'text/plain'})
+      return file;
+    }
+    else{
+      for(let i = 0; i<this.pic.pixels.length;i++){
+        arr = arr.concat('\n'+this.pic.pixels[i].r+' '+this.pic.pixels[i].g+' '+this.pic.pixels[i].b);
+      }
+      let file = new File(arr, 'newPic.ppm', {type: 'text/plain'})
+      return file;
+    }
+  }
   public getValMax(){
     if(!this.isLoaded) return 255;
     else return this.pic.valMax;
@@ -33,9 +50,11 @@ export class ImageService {
     return this.pic.largura;
   }
 
-  public getSobel(x,y){
+  public getSobel(x: number,y: number){
     const largura = this.pic.largura, index = y*largura+x;
-    return [this.magnitude[index], this.gX[index], this.gY[index]];
+    if(this.magnitude[index] == undefined || this.gX[index] == undefined || this.gY[index] == undefined)
+    return [0,0,0];
+    else return [this.magnitude[index], this.gX[index], this.gY[index]];
   }
 
   upload(arquivo: File): Promise<boolean>{
@@ -165,6 +184,26 @@ export class ImageService {
       this.pic.pixels[i].r = this.pic.pixels[i].r >= val ? this.pic.valMax : 0;
       this.pic.pixels[i].g = this.pic.pixels[i].g >= val ? this.pic.valMax : 0;
       this.pic.pixels[i].b = this.pic.pixels[i].b >= val ? this.pic.valMax : 0;
+    }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+  public compEscDin(c: number, gamma: number){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens cinza, do tipo .pgm");
+    let pixels = [];
+    for(let i=0; i<this.pic.pixels.length; i++){
+      let S = c*Math.pow(this.pic.pixels[i].r, gamma);
+      pixels.push(S);
+    }
+    let minmax = this.getMinMax(pixels);
+    for(let i = 0; i<pixels.length; i++){
+      let S = 255*((pixels[i]-minmax[0])/(minmax[1]-minmax[0]));
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = Math.round(S);
+      this.pic.pixels[i].g = Math.round(S);
+      this.pic.pixels[i].b = Math.round(S);
     }
     this.canUndo = true;
     this.pictureStream.next(this.pic);
@@ -329,48 +368,97 @@ export class ImageService {
   }
   public media(){
     if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
-    let largura = this.pic.largura, altura = this.pic.altura;
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
     for(let i=0; i<altura; i++)
       for(let j=0; j<largura; j++){
         let  index = i*largura+j, value=0;
         let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
         for(let aux = 0; aux<9; aux++) value+=mask[aux];
         value = value/9;
-        if(value<0) value = 0;
-        if(value>this.pic.valMax) value = this.pic.valMax;
-        //console.log(index, value);
-        this.pic2.pixels[index].r = this.pic.pixels[index].r;
-        this.pic2.pixels[index].g = this.pic.pixels[index].g;
-        this.pic2.pixels[index].b = this.pic.pixels[index].b;
-        this.pic.pixels[index].r = Math.round(value);
-        this.pic.pixels[index].g = Math.round(value);
-        this.pic.pixels[index].b = Math.round(value);
+        pixels.push(Math.round(value));
+      }
+      for(let i = 0; i<pixels.length; i++){
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+        this.pic.pixels[i].r = pixels[i];
+        this.pic.pixels[i].g = pixels[i];
+        this.pic.pixels[i].b = pixels[i];
       }
     this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
   public mediana(){
     if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
-    let largura = this.pic.largura, altura = this.pic.altura;
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
     for(let i=0; i<altura; i++)
       for(let j=0; j<largura; j++){
         let  index = i*largura+j;
         let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
         this.bubbleSort(mask, mask.length);
-        this.pic2.pixels[index].r = this.pic.pixels[index].r;
-        this.pic2.pixels[index].g = this.pic.pixels[index].g;
-        this.pic2.pixels[index].b = this.pic.pixels[index].b;
-        this.pic.pixels[index].r = mask[4];
-        this.pic.pixels[index].g = mask[4];
-        this.pic.pixels[index].b = mask[4];
+        pixels.push(mask[4]);
+      }
+    for(let i = 0; i<pixels.length; i++){
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = pixels[i];
+      this.pic.pixels[i].g = pixels[i];
+      this.pic.pixels[i].b = pixels[i];
+    }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+
+  public laplace(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j, value=0;
+        let mask = this.calcVizinho3x3(i, j, index, [0,-1,0,-1,4,-1,0,-1,0]); 
+        for(let aux = 0; aux<9; aux++) value+=mask[aux];
+        value = Math.abs(value);
+        pixels.push(Math.round(value));
+      }
+      for(let i=0; i<pixels.length; i++){
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+        this.pic.pixels[i].r = pixels[i];
+        this.pic.pixels[i].g = pixels[i];
+        this.pic.pixels[i].b = pixels[i];
       }
     this.canUndo = true;
     this.pictureStream.next(this.pic);
   }
+
+  public laplaceSharp(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j, value=0;
+        let mask = this.calcVizinho3x3(i, j, index, [0,-1,0,-1,5,-1,0,-1,0]); 
+        for(let aux = 0; aux<9; aux++) value+=mask[aux];
+        value = Math.abs(value);
+        pixels.push(Math.round(value));
+      }
+      for(let i=0; i<pixels.length; i++){
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+        this.pic.pixels[i].r = pixels[i];
+        this.pic.pixels[i].g = pixels[i];
+        this.pic.pixels[i].b = pixels[i];
+      }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+
   public sobel(){
     if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
     let magnitude = [], largura = this.pic.largura, altura = this.pic.altura, copiaX, copiaY;
-    this.magnitude = [];
     this.gX = [];
     this.gY = [];
     for(let i=0; i<altura; i++)
@@ -509,5 +597,43 @@ export class ImageService {
       //console.log('teste9F');
     }
     return mask2;
+  }
+  
+  public dct(){
+    const m=this.pic.altura, n=this.pic.largura, pi = 3.142857;
+    let dct = [];
+    for(let i=0; i<m; i++){
+      for(let j=0; j<n; j++){
+        let ci, cj, sum = 0;
+        if(i==0) ci = 1/Math.sqrt(m);
+        else ci = Math.sqrt(2)/Math.sqrt(m);
+        if(j == 0) cj = 1/Math.sqrt(n);
+        else cj = Math.sqrt(2)/Math.sqrt(n);
+        
+        for(let k=0; k<m; k++){
+          for(let l=0; l<n; l++){
+            let index = k*n+l;
+            let dct1 = this.pic.pixels[index].r * 
+            Math.cos((2*k+1)*i*pi/(2*m)) * 
+            Math.cos((2*l+1)*j*pi/(2*n));
+            sum = sum + dct1;
+          }
+        }
+        dct.push(ci*cj*sum);
+        //console.log([ci, cj, sum, ci*cj*sum])
+      }
+    }
+    let minmax = this.getMinMax(dct);
+    for(let i=0; i<this.pic.pixels.length; i++){
+      let dct2 =255*((dct[i]-minmax[0])/(minmax[1]-minmax[0]));
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = dct2;
+      this.pic.pixels[i].g = dct2;
+      this.pic.pixels[i].b = dct2;
+    }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
   }
 }

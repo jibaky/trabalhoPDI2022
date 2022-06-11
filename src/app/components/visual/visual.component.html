@@ -18,7 +18,7 @@
     <mat-expansion-panel [disabled]="!servico.isLoaded">
         <mat-expansion-panel-header>
             <mat-panel-title>
-                clique para visualizar informações sobre o pixel clicado
+                clique para visualizar informações sobre o pixel sob o cursor
             </mat-panel-title>
         </mat-expansion-panel-header>
         <div class="flex">
@@ -59,3 +59,4 @@
         </div>
     </mat-expansion-panel>
 </mat-accordion>
+<button mat-button color="accent" [disabled]="!servico.isLoaded" (click)="download()">download da imagem resultante atual</button>

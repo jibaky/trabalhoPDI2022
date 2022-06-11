@@ -9,7 +9,6 @@ import { ImageService } from 'src/app/services/image.service';
 export class HomeComponent implements OnInit {
 
   constructor(public servico: ImageService) { }
-
   textoR: any = 0;
   textoG: any = 0;
   textoB: any = 0;
@@ -18,6 +17,8 @@ export class HomeComponent implements OnInit {
   textoL: any = 0;
   limiar: number = 128;
   ruido: number = 10;
+  Cnumber: any = 1;
+  Gamma: any = 1;
 
   converterRGB2HSL(r, g, b){
     let arr = this.servico.RGBtoHSL(r, g, b);
@@ -45,6 +46,11 @@ export class HomeComponent implements OnInit {
     this.servico.tornarCinza();
   }
 
+  compEscDin(){
+    console.log(this.Cnumber, this.Gamma)
+    this.servico.compEscDin(this.Cnumber, this.Gamma);
+  }
+
   binarizacao(){
     this.servico.binarizacao(this.limiar);
   }
@@ -65,6 +71,14 @@ export class HomeComponent implements OnInit {
     this.servico.mediana();
   }
 
+  laplace(){
+    this.servico.laplace();
+  }
+
+  laplaceSharp(){
+    this.servico.laplaceSharp();
+  }
+
   sobel(){
     this.servico.sobel();
   }
@@ -81,6 +95,10 @@ export class HomeComponent implements OnInit {
     this.servico.addRuido(this.ruido/100, 1, 1);
   }
 
+  dct(){
+    this.servico.dct();
+  }
+  
   ngOnInit(): void {
   }
   

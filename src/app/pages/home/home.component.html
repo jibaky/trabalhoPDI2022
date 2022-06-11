@@ -13,11 +13,20 @@
             <button mat-menu-item [matMenuTriggerFor]="func3">Ruídos</button>
         </mat-menu>
         
-        <mat-menu #func1="matMenu" class="centerBox">
+        <mat-menu #func1="matMenu">
             <button mat-button color="accent" (click)="negativar()" [disabled]="!servico.isLoaded">Inverter cores</button>
             <br>
             <button mat-button color="accent" (click)="tornarCinza()" [disabled]="!servico.isLoaded">Tornar cinza</button>
             <br>
+            <button mat-button color="accent" (click)="equalizarHistograma()" [disabled]="!servico.isLoaded">Equalizar histograma</button>
+            <br>
+            <button mat-menu-item [matMenuTriggerFor]="func11">Binarização e Limiarizaçao</button>
+            <br>
+            <button mat-menu-item [matMenuTriggerFor]="func12">Compressão de escala dinâmica</button>
+        </mat-menu>
+
+        <mat-menu #func11="matMenu">
+            <button mat-button [disabled]="true">Limiar</button>
             <mat-slider
                 [disabled]="!servico.isLoaded"
                 [min] = "0"
@@ -25,35 +34,68 @@
                 [thumbLabel]="true"
                 color="accent"
                 [(value)]="limiar"
-            ></mat-slider>
-            <button mat-button color="accent" (click)="binarizacao()" [disabled]="!servico.isLoaded">Binarização</button>
+                (click)="$event.stopPropagation();"
+            ></mat-slider><br>
+            <button mat-button color="accent" (click)="binarizacao()" [disabled]="!servico.isLoaded">Binarização</button><br>
             <button mat-button color="accent" (click)="limiarizacao()" [disabled]="!servico.isLoaded">Limiarização</button>
         </mat-menu>
 
-        <mat-menu #func2="matMenu" class="centerBox">
-            <button mat-button color="accent" (click)="equalizarHistograma()" [disabled]="!servico.isLoaded">Equalizar histograma</button>
+        <mat-menu #func12="matMenu">
+            <button mat-button [disabled]="true">C</button>
+            
+            <mat-slider
+                [disabled]="!servico.isLoaded"
+                [min] = "1"
+                [max]= "50"
+                [thumbLabel]="true"
+                color="accent"
+                [(value)]="Cnumber"
+                (click)="$event.stopPropagation();"
+                style="overflow: visible"
+            ></mat-slider>
             <br>
+            <button mat-button [disabled]="true">Gamma</button>
+            
+            <mat-slider
+                [disabled]="!servico.isLoaded"
+                [min] = "0"
+                [max]= "1"
+                [step]="0.1"
+                [thumbLabel]="true"
+                color="accent"
+                [(value)]="Gamma"
+                (click)="$event.stopPropagation();"
+            ></mat-slider>
+            <br>
+            <button mat-button color="accent" (click)="compEscDin()" [disabled]="!servico.isLoaded">Aplicar</button>
+        </mat-menu>
+
+        <mat-menu #func2="matMenu">
             <button mat-button color="accent" (click)="media()" [disabled]="!servico.isLoaded">Media</button>
             <br>
             <button mat-button color="accent" (click)="mediana()" [disabled]="!servico.isLoaded">Mediana</button>
             <br>
+            <button mat-button color="accent" (click)="laplace()" [disabled]="!servico.isLoaded">Laplace</button>
+            <br>
+            <button mat-button color="accent" (click)="laplaceSharp()" [disabled]="!servico.isLoaded">Realce laplaciano</button>
+            <br>
             <button mat-button color="accent" (click)="sobel()" [disabled]="!servico.isLoaded">Sobel</button>
         </mat-menu>
 
-        <mat-menu #func3="matMenu" class="centerBox">
+        <mat-menu #func3="matMenu">
+            <button mat-button [disabled]="true">Porcentagem do ruído</button>
             <mat-slider
             [disabled]="!servico.isLoaded"
             [min] = "0"
             [max]= "100"
             [thumbLabel]="true"
+            [step]="1"
             color="accent"
             [(value)]="ruido"
-        ></mat-slider>
-        
-        <button mat-button color="accent" (click)="ruidoPreto()" [disabled]="!servico.isLoaded">Ruído preto</button>
-        
-        <button mat-button color="accent" (click)="ruidoBranco()" [disabled]="!servico.isLoaded">Ruído branco</button>
-        
+            (click)="$event.stopPropagation();"
+        ></mat-slider><br>
+        <button mat-button color="accent" (click)="ruidoPreto()" [disabled]="!servico.isLoaded">Ruído preto</button><br>
+        <button mat-button color="accent" (click)="ruidoBranco()" [disabled]="!servico.isLoaded">Ruído branco</button><br>
         <button mat-button color="accent" (click)="saltPepper()" [disabled]="!servico.isLoaded">Sal e pimenta</button>
         </mat-menu>
 
@@ -83,3 +125,5 @@
     </div>
     <app-visual></app-visual>
 </div>
+<!-- 
+<button mat-button color="accent" (click)="dct()">dct</button>  -->

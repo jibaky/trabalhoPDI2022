@@ -22,7 +22,7 @@ export class VisualComponent {
   textoL: any = 0;
   textoX: any = 0;
   textoY: any = 0;
-  textoSobelM: any = 0;
+  textoSobelM: any = 0.000;
   textoSobelX: any = 0;
   textoSobelY: any = 0;
   
@@ -39,7 +39,21 @@ export class VisualComponent {
       context.fillRect(i%pic.largura, Math.floor(i/pic.largura), 1, 1);
     }
   }
-
+  download() {
+    let file = this.servico.getNewPic();
+    
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(file)
+  
+    link.href = url
+    link.download = file.name
+    document.body.appendChild(link)
+    link.click()
+  
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  }
+  
   converterRGB2HSL(r, g, b){
     let arr = this.servico.RGBtoHSL(r, g, b);
     this.textoH = arr[0];
@@ -78,7 +92,7 @@ export class VisualComponent {
     this.textoX = Math.round(x);
     this.textoY = Math.round(y);
     let arr = this.servico.getSobel(x,y);
-    this.textoSobelM = arr[0];
+    this.textoSobelM = arr[0].toFixed(3);
     this.textoSobelX = arr[1];
     this.textoSobelY = arr[2];
   }
@@ -92,9 +106,9 @@ export class VisualComponent {
       this.drawOnCanvas(this.myCanvasG, updatedPicture, 0, 1, 0);
       this.drawOnCanvas(this.myCanvasB, updatedPicture, 0, 0, 1);
     });
-    this.myCanvas.nativeElement.addEventListener("mousedown", (e)=>{
-      this.getMousePosition(e);
-    })
+    this.myCanvas.nativeElement.addEventListener("mousemove", (e)=>{
+      if(this.servico.isLoaded) this.getMousePosition(e);
+      })
   }
 
 }

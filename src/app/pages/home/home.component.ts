@@ -71,6 +71,18 @@ export class HomeComponent implements OnInit {
     this.servico.mediana();
   }
 
+  pontoMin(){
+    this.servico.pontoMinimo();
+  }
+
+  pontoMax(){
+    this.servico.pontoMaximo();
+  }
+
+  pontoMed(){
+    this.servico.pontoMedio();
+  }
+
   laplace(){
     this.servico.laplace();
   }
@@ -84,22 +96,43 @@ export class HomeComponent implements OnInit {
   }
 
   ruidoPreto(){
-    this.servico.addRuido(this.ruido/100, 1, 0);
+    this.servico.addRuidoAleatorio(this.ruido/100, 1, 0);
   }
 
   ruidoBranco(){
-    this.servico.addRuido(this.ruido/100, 0, 1);
+    this.servico.addRuidoAleatorio(this.ruido/100, 0, 1);
+  }
+
+  ruidoLocal(x,y){
+    this.servico.addRuidoLocal(x,y);
   }
 
   saltPepper(){
-    this.servico.addRuido(this.ruido/100, 1, 1);
+    this.servico.addRuidoAleatorio(this.ruido/100, 1, 1);
   }
 
   dct(){
     this.servico.dct();
   }
-  
+
+  idct(){
+    this.servico.idct();
+  }
+
+  pseudoCores(){
+    this.servico.pseudoCor();
+  }
+
+  LapOfGau(){
+    this.servico.lapOfGau();
+  }
+
+  otsu(){
+    this.servico.otsu()
+  }
+
   ngOnInit(): void {
+    this.servico.getHue();
   }
   
 

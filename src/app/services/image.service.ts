@@ -11,6 +11,15 @@ export class ImageService {
   public magnitude = [];
   public gX: any = [];
   public gY: any = [];
+  private dct0;
+  private color = [//preto azul ciano verde amarelo
+    {r:0, g:0, b:0},
+    {r:0, g:0, b:255},
+    {r:0, g:255, b:255},
+    {r:0, g:255, b:0},
+    {r:255, g:255, b:0}
+  ];
+  private hue = [];
   private pic: Imagem = new Imagem();
   private pic2: Imagem = new Imagem();
   /** observable da imagem original */
@@ -327,7 +336,7 @@ export class ImageService {
     
     return [Math.round(r*255), Math.round(g*255), Math.round(b*255)]
   }
-  public addRuido(qtd, b, w){
+  public addRuidoAleatorio(qtd, b, w){
     for(let i=0; i < this.pic.pixels.length; i++){
       this.pic2.pixels[i].r = this.pic.pixels[i].r;
       this.pic2.pixels[i].g = this.pic.pixels[i].g;
@@ -348,6 +357,20 @@ export class ImageService {
       this.pic.pixels[index].b = cor;
     }
     this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+  public addRuidoLocal(x, y){
+    let largura = this.pic.largura, cor = 0,index = y*largura+x
+    let media = (this.pic.pixels[index].r + this.pic.pixels[index].g + this.pic.pixels[index].b)/3
+    if(media <= 127) cor = 255
+    this.pic2.pixels[index].r = this.pic.pixels[index].r;
+    this.pic2.pixels[index].g = this.pic.pixels[index].g;
+    this.pic2.pixels[index].b = this.pic.pixels[index].b;
+    this.pic.pixels[index].r = cor
+    this.pic.pixels[index].g = cor
+    this.pic.pixels[index].b = cor
+    this.canUndo = true;
+    if(this.dct0 != undefined) this.dct0[index] = cor
     this.pictureStream.next(this.pic);
   }
   private bubbleSort(arr, tam){
@@ -397,6 +420,72 @@ export class ImageService {
         let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
         this.bubbleSort(mask, mask.length);
         pixels.push(mask[4]);
+      }
+    for(let i = 0; i<pixels.length; i++){
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = pixels[i];
+      this.pic.pixels[i].g = pixels[i];
+      this.pic.pixels[i].b = pixels[i];
+    }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+
+  public pontoMinimo(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j;
+        let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
+        this.bubbleSort(mask, mask.length);
+        pixels.push(mask[0]);
+      }
+    for(let i = 0; i<pixels.length; i++){
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = pixels[i];
+      this.pic.pixels[i].g = pixels[i];
+      this.pic.pixels[i].b = pixels[i];
+    }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+
+  public pontoMaximo(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j;
+        let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
+        this.bubbleSort(mask, mask.length);
+        pixels.push(mask[8]);
+      }
+    for(let i = 0; i<pixels.length; i++){
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = pixels[i];
+      this.pic.pixels[i].g = pixels[i];
+      this.pic.pixels[i].b = pixels[i];
+    }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+
+  public pontoMedio(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j;
+        let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
+        this.bubbleSort(mask, mask.length);
+        pixels.push(Math.round((mask[8]+mask[0])/2));
       }
     for(let i = 0; i<pixels.length; i++){
       this.pic2.pixels[i].r = this.pic.pixels[i].r;
@@ -498,17 +587,11 @@ export class ImageService {
     }
     return [min, max]
   }
-  private convol3x3(pixels, mask1){
-    let mask2 = [0,0,0,0,0,0,0,0,0];
-    mask2[0] = pixels[0] * mask1[0];
-    mask2[1] = pixels[1] * mask1[1];
-    mask2[2] = pixels[2] * mask1[2];
-    mask2[3] = pixels[3] * mask1[3];
-    mask2[4] = pixels[4] * mask1[4];
-    mask2[5] = pixels[5] * mask1[5];
-    mask2[6] = pixels[6] * mask1[6];
-    mask2[7] = pixels[7] * mask1[7];
-    mask2[8] = pixels[8] * mask1[8];
+  private convol(pixels, mask1){
+    let mask2 = [ ];
+    for(let i = 0; i<mask1.length; i++){
+      mask2.push(pixels[i] * mask1[i])
+    }
     return mask2;
   }
   private calcVizinho3x3(i, j, index, mask1){
@@ -517,7 +600,7 @@ export class ImageService {
     //console.log(index);
     if(index == 0){//canto superior esquerdo
       //console.log('teste1', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+0);
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[index].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r, 
         this.pic.pixels[index].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r, 
         this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j+1)].r], 
@@ -526,7 +609,7 @@ export class ImageService {
     }
     else if(index == largura-1){//canto superior direito
       //console.log('teste2','index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(largura-1));
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index].r,
         this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index].r,
         this.pic.pixels[(i+1)*largura+(j-1)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j)].r],
@@ -535,7 +618,7 @@ export class ImageService {
     }
     else if(index == (altura-1)*largura){//canto inferior esquerdo
       //console.log('teste3', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(altura-1)*largura);
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,
         this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,
         this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r],
@@ -544,7 +627,7 @@ export class ImageService {
     }
     else if(index == altura*largura-1){//canto inferior direito
       //console.log('teste4', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(altura*largura-1));
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,
         this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
         this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r],
@@ -553,7 +636,7 @@ export class ImageService {
     }
     else if(index == i*largura){//borda esquerda
       //console.log('teste5', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(i*largura));
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[(i-1)*largura+(j)].r, this.pic.pixels[(i-1)*largura+(j)].r, this.pic.pixels[(i-1)*largura+(j+1)].r,
         this.pic.pixels[index].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
         this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j+1)].r],
@@ -562,7 +645,7 @@ export class ImageService {
     }
     else if(index == (i+1)*largura-1){//borda direita
       //console.log('teste6', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+((i+1)*largura-1));
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[(i-1)*largura+(j-1)].r, this.pic.pixels[(i-1)*largura+(j)].r, this.pic.pixels[(i-1)*largura+(j)].r,
         this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index].r,
         this.pic.pixels[(i+1)*largura+(j-1)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j)].r],
@@ -571,7 +654,7 @@ export class ImageService {
     }
     else if(index < largura){//borda cima
       //console.log('teste7', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '<'+largura);
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
         this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
         this.pic.pixels[(i+1)*largura+(j-1)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j+1)].r],
@@ -580,7 +663,7 @@ export class ImageService {
     }
     else if(index > (altura-1)*largura){//borda baixo
       //console.log('teste8', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '>'+(altura-1)*largura);
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[(i-1)*largura+(j-1)].r, this.pic.pixels[(i-1)*largura+j].r, this.pic.pixels[(i-1)*largura+(j+1)].r,
         this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
         this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r],
@@ -589,7 +672,7 @@ export class ImageService {
     }
     else{
       //console.log('teste9', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura);
-      mask2 = this.convol3x3([
+      mask2 = this.convol([
         this.pic.pixels[(i-1)*largura+(j-1)].r, this.pic.pixels[(i-1)*largura+(j)].r, this.pic.pixels[(i-1)*largura+(j+1)].r,
         this.pic.pixels[index-1].r, this.pic.pixels[index].r, this.pic.pixels[index+1].r,
         this.pic.pixels[(i+1)*largura+(j-1)].r, this.pic.pixels[(i+1)*largura+(j)].r, this.pic.pixels[(i+1)*largura+(j+1)].r],
@@ -598,10 +681,261 @@ export class ImageService {
     }
     return mask2;
   }
-  
+
+  private calcVizinho5x5(i, j, index, mask1){
+    let mask2 ;
+    let largura = this.pic.largura, altura = this.pic.altura;
+    // console.log('index convol: '+index);
+    if(index == 0){//canto superior esquerdo
+      //console.log('teste1', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+0);
+      mask2 = this.convol([
+          this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r
+          ], mask1);
+      //console.log('teste1F');
+    }
+    else if(index == 1){
+      mask2 = this.convol([
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r
+          ], mask1);
+    }
+    else if(index == largura-2){
+      mask2 = this.convol([
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,
+          this.pic.pixels[(i+2)*largura+(j-2)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+1)].r
+          ], mask1);
+    }
+    else if(index == largura-1){//canto superior direito
+    //console.log('teste2','index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(largura-1));
+    mask2 = this.convol([
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,
+          this.pic.pixels[(i+2)*largura+(j-2)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r
+          ], mask1);
+    //console.log('teste2F');
+    }
+    else if(index == largura){
+      mask2 = this.convol([
+          this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r
+          ], mask1);
+    }
+    else if(index == largura+1){
+      mask2 = this.convol([
+          this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r
+          ], mask1);
+    }
+    else if(index == 2*largura-2){
+      mask2 = this.convol([
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,
+          this.pic.pixels[(i+2)*largura+(j-2)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+1)].r
+          ], mask1);
+    }
+    else if(index == 2*largura-1){
+      mask2 = this.convol([
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,
+          this.pic.pixels[(i+2)*largura+(j-2)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r
+          ], mask1);
+    }
+    else if(index == (altura-2)*largura){
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r
+          ], mask1);
+    }
+    else if(index == (altura-2)*largura+1){
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r
+          ], mask1);
+    }
+    else if(index == (altura-1)*largura-2){
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+1)].r
+          ], mask1);
+    }
+    else if(index == (altura-1)*largura-1){
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r
+          ], mask1);
+    }
+    else if(index == (altura-1)*largura){//canto inferior esquerdo
+      //console.log('teste3', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(altura-1)*largura);
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r
+          ], mask1);
+      //console.log('teste3F');
+    }
+    else if(index == (altura-1)*largura+1){
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r
+          ], mask1);
+    }
+    else if(index == altura*largura-2){
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r
+          ], mask1);
+    }
+    else if(index == altura*largura-1){//canto inferior direito
+      //console.log('teste4', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(altura*largura-1));
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r
+          ], mask1);
+      //console.log('teste4F');
+    }
+    else if(index>largura+1 && index<2*largura-2){//semiborda cima
+      mask2 = this.convol([
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+2)*largura+(j-2)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r,
+          ], mask1);
+    }
+    else if(index == i*largura+1){//semiborda esquerda
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index-1].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r,
+          ], mask1);
+    }
+    else if(index == (i+1)*largura-2){//semiborda direita
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+1].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,
+          ], mask1);
+    }
+    else if(index>(altura-2)*largura+1 && index<(altura-1)*largura-2){//semiborda baixo
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          ], mask1);
+    }
+    else if(index < largura){//borda cima
+      //console.log('teste7', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '<'+largura);
+      mask2 = this.convol([
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+2)*largura+(j-2)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r
+          ], mask1);
+      //console.log('teste7F');
+    }
+    else if(index == i*largura){//borda esquerda
+      //console.log('teste5', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(i*largura));
+       console.log((i+2)*largura+(j), i, largura, j)
+       mask2 = this.convol([
+           this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+           this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+           this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+           this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+           this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r
+           ], mask1);
+     //console.log('teste5F');
+     }
+    else if(index == (i+1)*largura-1){//borda direita
+      //console.log('teste6', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+((i+1)*largura-1));
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index].r,this.pic.pixels[index].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j)].r,
+          this.pic.pixels[(i+2)*largura+(j-2)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j)].r
+          ], mask1);
+      //console.log('teste6F');
+    }
+    else if(index > (altura-1)*largura){//borda baixo
+      //console.log('teste8', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '>'+(altura-1)*largura);
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r
+          ], mask1);
+      //console.log('teste8F');
+    }
+    else{
+      //console.log('teste9', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura);
+      mask2 = this.convol([
+          this.pic.pixels[(i-2)*largura+(j-2)].r,this.pic.pixels[(i-2)*largura+(j-1)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
+          this.pic.pixels[(i-1)*largura+(j-2)].r,this.pic.pixels[(i-1)*largura+(j-1)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,
+          this.pic.pixels[index-2].r,this.pic.pixels[index-1].r,this.pic.pixels[index].r,this.pic.pixels[index+1].r,this.pic.pixels[index+2].r,
+          this.pic.pixels[(i+1)*largura+(j-2)].r,this.pic.pixels[(i+1)*largura+(j-1)].r,this.pic.pixels[(i+1)*largura+(j)].r,this.pic.pixels[(i+1)*largura+(j+1)].r,this.pic.pixels[(i+1)*largura+(j+2)].r,
+          this.pic.pixels[(i+2)*largura+(j-2)].r,this.pic.pixels[(i+2)*largura+(j-1)].r,this.pic.pixels[(i+2)*largura+(j)].r,this.pic.pixels[(i+2)*largura+(j+1)].r,this.pic.pixels[(i+2)*largura+(j+2)].r
+          ], mask1);
+      //console.log('teste9F');
+    }
+   return mask2;
+  }
+
   public dct(){
     const m=this.pic.altura, n=this.pic.largura, pi = 3.142857;
-    let dct = [];
+    this.dct0 = [];
     for(let i=0; i<m; i++){
       for(let j=0; j<n; j++){
         let ci, cj, sum = 0;
@@ -613,19 +947,22 @@ export class ImageService {
         for(let k=0; k<m; k++){
           for(let l=0; l<n; l++){
             let index = k*n+l;
-            let dct1 = this.pic.pixels[index].r * 
-            Math.cos((2*k+1)*i*pi/(2*m)) * 
-            Math.cos((2*l+1)*j*pi/(2*n));
+            let cosY = Math.cos((2*k+1)*i*pi/(2*m))
+            let cosX = Math.cos((2*l+1)*j*pi/(2*n))
+            let dct1 = this.pic.pixels[index].r * cosY * cosX;
             sum = sum + dct1;
           }
         }
-        dct.push(ci*cj*sum);
+        // console.log(i*n+j)
+        this.dct0.push(ci*cj*sum);
         //console.log([ci, cj, sum, ci*cj*sum])
       }
     }
-    let minmax = this.getMinMax(dct);
+    // console.log(dct);
+    let minmax = this.getMinMax(this.dct0);
     for(let i=0; i<this.pic.pixels.length; i++){
-      let dct2 =255*((dct[i]-minmax[0])/(minmax[1]-minmax[0]));
+      // let dct2 =Math.round(255*((this.dct0[i]-minmax[0])/(minmax[1]-minmax[0])));
+      let dct2 = this.dct0[i]
       this.pic2.pixels[i].r = this.pic.pixels[i].r;
       this.pic2.pixels[i].g = this.pic.pixels[i].g;
       this.pic2.pixels[i].b = this.pic.pixels[i].b;
@@ -635,5 +972,120 @@ export class ImageService {
     }
     this.canUndo = true;
     this.pictureStream.next(this.pic);
+  }
+  public idct(){
+    const m=this.pic.altura, n=this.pic.largura, pi = 3.142857, idct0 = [];
+    if(this.dct0 == undefined){
+      this.dct0 = []
+      for(let i=0; i< this.pic.pixels.length; i++){
+        this.dct0.push(this.pic.pixels[i].r)
+      }
+    }
+    for(let i=0; i<m; i++){
+      for(let j=0; j<n; j++){
+        let ci, cj, sum = 0;
+        if(i==0) ci = 1/Math.sqrt(m);
+        else ci = Math.sqrt(2)/Math.sqrt(m);
+        if(j == 0) cj = 1/Math.sqrt(n);
+        else cj = Math.sqrt(2)/Math.sqrt(n);
+        
+        for(let k=0; k<m; k++){
+          for(let l=0; l<n; l++){
+            let index = k*n+l;
+            let cosY = Math.cos((2*k+1)*i*pi/(2*m))
+            let cosX = Math.cos((2*l+1)*j*pi/(2*n))
+            let dct1 = ci*cj*this.dct0[index] * cosY * cosX;
+            sum = sum + dct1; 
+          }
+        }
+        idct0.push(sum);
+      }
+    }
+    // console.log(dct);
+    let minmax = this.getMinMax(idct0);
+    for(let i=0; i<this.pic.pixels.length; i++){
+      // let idct1 = Math.round(255*((idct0[i]-minmax[0])/(minmax[1]-minmax[0])))
+      let idct1 = idct0[i]
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = idct1;
+      this.pic.pixels[i].g = idct1;
+      this.pic.pixels[i].b = idct1;
+    }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+    console.log(idct0)
+  }
+  public getHue(){
+    for(let i = 0; i<this.color.length-1; i++){
+      let currentColor = this.color[i], nextColor = this.color[i+1]
+      for(let j = 0; j<256; j++){
+        let r=0, g=0, b=0;
+        if( i>0 && j == 0) j++
+        if(currentColor.r<nextColor.r)
+          r = currentColor.r + j;
+        else if(currentColor.r == nextColor.r)
+          r = currentColor.r 
+        else r = currentColor.r - j;
+
+        if(currentColor.g<nextColor.g)
+          g = currentColor.g + j;
+        else if(currentColor.g == nextColor.g)
+          g = currentColor.g 
+        else g = currentColor.g - j;
+
+        if(currentColor.b<nextColor.b)
+          b = currentColor.b + j;
+        else if(currentColor.b == nextColor.b)
+          b = currentColor.b 
+        else b = currentColor.b - j;
+
+        this.hue.push({r:r, g:g, b:b})
+      }
+    }
+  }
+
+  public pseudoCor(){
+    for(let i=0; i<this.pic.pixels.length; i++){
+      let index = Math.round((this.hue.length-1) * this.pic.pixels[i].r)/255;
+      this.pic2.pixels[i].r = this.pic.pixels[i].r;
+      this.pic2.pixels[i].g = this.pic.pixels[i].g;
+      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      this.pic.pixels[i].r = this.hue[index].r;
+      this.pic.pixels[i].g = this.hue[index].g;
+      this.pic.pixels[i].b = this.hue[index].b;
+    }
+    this.canUndo = true;
+    this.pic.tipo = "P3"
+    this.pictureStream.next(this.pic);
+  }
+  public lapOfGau(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j, value=0;
+        let mask = this.calcVizinho5x5(i, j, index, [0,0,-1,0,0,0,-1,-2,-1,0,-1,-2,16,-2,-1,0,-1,-2,-1,0,0,0,-1,0,0]); 
+        for(let aux = 0; aux<25; aux++) value+=mask[aux];
+        value = Math.abs(value);
+        pixels.push(Math.round(value));
+      }
+      let minmax = this.getMinMax(pixels)
+      for(let i=0; i<pixels.length; i++){
+        let pixelEq = 255*((pixels[i]-minmax[0])/(minmax[1]-minmax[0]));
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+        this.pic.pixels[i].r = pixelEq;
+        this.pic.pixels[i].g = pixelEq;
+        this.pic.pixels[i].b = pixelEq;
+      }
+    this.canUndo = true;
+    this.pictureStream.next(this.pic);
+  }
+  public otsu(){
+    let hist = this.getHistograma()
+    console.log(hist)
   }
 }

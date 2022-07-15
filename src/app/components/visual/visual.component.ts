@@ -109,6 +109,9 @@ export class VisualComponent {
     this.myCanvas.nativeElement.addEventListener("mousemove", (e)=>{
       if(this.servico.isLoaded) this.getMousePosition(e);
       })
+    this.myCanvas.nativeElement.addEventListener("click", ()=>{
+      this.servico.addRuidoLocal(this.textoX, this.textoY)
+    })
   }
 
 }

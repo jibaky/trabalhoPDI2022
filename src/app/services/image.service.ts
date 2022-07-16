@@ -1,3 +1,4 @@
+import { i18nMetaToJSDoc } from '@angular/compiler/src/render3/view/i18n/meta';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Imagem, Pixel } from '../models/image.model';
@@ -975,12 +976,12 @@ export class ImageService {
   }
   public idct(){
     const m=this.pic.altura, n=this.pic.largura, pi = 3.142857, idct0 = [];
-    if(this.dct0 == undefined){
-      this.dct0 = []
-      for(let i=0; i< this.pic.pixels.length; i++){
-        this.dct0.push(this.pic.pixels[i].r)
-      }
-    }
+    // if(this.dct0 == undefined){
+    //   this.dct0 = []
+    //   for(let i=0; i< this.pic.pixels.length; i++){
+    //     this.dct0.push(this.pic.pixels[i].r)
+    //   }
+    // }
     for(let i=0; i<m; i++){
       for(let j=0; j<n; j++){
         let ci, cj, sum = 0;
@@ -994,18 +995,20 @@ export class ImageService {
             let index = k*n+l;
             let cosY = Math.cos((2*k+1)*i*pi/(2*m))
             let cosX = Math.cos((2*l+1)*j*pi/(2*n))
-            let dct1 = ci*cj*this.dct0[index] * cosY * cosX;
+            let dct1 = ci*cj*this.pic.pixels[index].r * cosY * cosX;
             sum = sum + dct1; 
+            
           }
         }
         idct0.push(sum);
       }
     }
-    // console.log(dct);
+    // console.log(idct0);
     let minmax = this.getMinMax(idct0);
     for(let i=0; i<this.pic.pixels.length; i++){
-      // let idct1 = Math.round(255*((idct0[i]-minmax[0])/(minmax[1]-minmax[0])))
-      let idct1 = idct0[i]
+      let idct1 = Math.round(255*((idct0[i]-minmax[0])/(minmax[1]-minmax[0])))
+      idct0[i] = idct1
+      // let idct1 = idct0[i]
       this.pic2.pixels[i].r = this.pic.pixels[i].r;
       this.pic2.pixels[i].g = this.pic.pixels[i].g;
       this.pic2.pixels[i].b = this.pic.pixels[i].b;
@@ -1015,7 +1018,6 @@ export class ImageService {
     }
     this.canUndo = true;
     this.pictureStream.next(this.pic);
-    console.log(idct0)
   }
   public getHue(){
     for(let i = 0; i<this.color.length-1; i++){
@@ -1085,7 +1087,45 @@ export class ImageService {
     this.pictureStream.next(this.pic);
   }
   public otsu(){
-    let hist = this.getHistograma()
-    console.log(hist)
+    let hist = this.getHistograma(), arr = Object.keys(hist), qtd = this.pic.pixels.length
+    let sigma = []
+    // console.log(hist)
+    for(let i = 0; i<arr.length; i++){
+      let wb=0, wf=0, ub=0, uf=0, th = Number(arr[i])
+      // while(th == undefined) continue
+      // console.log(th)
+      for(let j = 0; Number(arr[j]) < th; j++){
+        let arj = Number(arr[j])
+        let histj = Number(hist[arj])
+        // console.log(j, 'A', wb, histj, arj, ub, arj*histj)
+        wb += histj
+        ub += arj*histj
+        // console.log(j, 'B', wb, histj, arj, ub, arj*histj)
+      }
+      for(let j = i; j<arr.length; j++){
+        let arj = Number(arr[j])
+        let histj = Number(hist[arj])
+        // console.log(j, 'C', wb, histj, arj, ub, arj*histj)
+        wf += histj
+        uf += arj*histj
+        // console.log(j, 'D', wb, histj, arj, ub, arj*histj)
+      }
+      if(wb != 0) ub = ub/wb
+      else ub = 0
+      if(wf != 0) uf = uf/wf
+      else uf = 0
+      wb = wb/qtd
+      wf = wf/qtd
+      sigma.push([wb*wf*Math.pow(ub-uf, 2), Number(arr[i])])
+      // console.log(wb, ub, wf, uf, wb*wf*Math.pow(ub-uf, 2))
+    }
+    let aux = []
+    for(let i=0; i<sigma.length; i++){
+      aux.push(sigma[i][0])
+    }
+    let minmax = this.getMinMax(aux)
+    for(let i=0; i<sigma.length; i++){
+      if(sigma[i][0] == minmax[1]) return sigma[i][1]
+    }
   }
 }

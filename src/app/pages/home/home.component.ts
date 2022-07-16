@@ -128,7 +128,7 @@ export class HomeComponent implements OnInit {
   }
 
   otsu(){
-    this.servico.otsu()
+    this.limiar = Math.round(this.servico.otsu())
   }
 
   ngOnInit(): void {

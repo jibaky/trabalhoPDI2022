@@ -15,7 +15,8 @@ export class HomeComponent implements OnInit {
   textoH: any = 0;
   textoS: any = 0;
   textoL: any = 0;
-  limiar: number = 128;
+  raioPassada: any = 77;
+  limiar: number = 1;
   ruido: number = 10;
   Cnumber: any = 1;
   Gamma: any = 1;
@@ -84,7 +85,7 @@ export class HomeComponent implements OnInit {
   }
 
   laplace(){
-    this.servico.laplace();
+    this.servico.lap();
   }
 
   laplaceSharp(){
@@ -123,12 +124,25 @@ export class HomeComponent implements OnInit {
     this.servico.pseudoCor();
   }
 
-  LapOfGau(){
-    this.servico.lapOfGau();
+  // LapOfGau(){
+  //   this.servico.lapOfGau();
+  // }
+
+  otsuL(){
+    this.limiar = Math.round(this.servico.otsu())
+    this.limiarizacao();
+  }
+  otsuB(){
+    this.limiar = Math.round(this.servico.otsu())
+    this.binarizacao();
+  }
+  
+  passaBaixa(){
+    this.servico.passaBaixa(this.raioPassada);
   }
 
-  otsu(){
-    this.limiar = Math.round(this.servico.otsu())
+  passaAlta(){
+    this.servico.passaAlta(this.raioPassada);
   }
 
   ngOnInit(): void {

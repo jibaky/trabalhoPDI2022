@@ -9,10 +9,10 @@ import { Imagem, Pixel } from '../models/image.model';
 export class ImageService {
   public isLoaded: boolean = false;
   public canUndo: boolean = false;
+  public isLaplace: boolean = false;
   public magnitude = [];
   public gX: any = [];
   public gY: any = [];
-  private dct0;
   private color = [//preto azul ciano verde amarelo
     {r:0, g:0, b:0},
     {r:0, g:0, b:255},
@@ -27,6 +27,7 @@ export class ImageService {
   public originalStream = new BehaviorSubject(null);
   /** observable da imagem com alterações */
   public pictureStream = new BehaviorSubject(null);
+  public lapOfGauStream = new BehaviorSubject(null);
 
   constructor() { }
 
@@ -130,12 +131,20 @@ export class ImageService {
     return pixels;
   }
   public undo(){
+    if(this.isLaplace){
+      for(let i=0; i<this.pic.pixels.length; i++){
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      }
+    }
     for(let i=0; i<this.pic.pixels.length; i++){
       this.pic.pixels[i].r = this.pic2.pixels[i].r;
       this.pic.pixels[i].g = this.pic2.pixels[i].g;
       this.pic.pixels[i].b = this.pic2.pixels[i].b;
     }
     this.canUndo = false;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   /**
@@ -152,6 +161,7 @@ export class ImageService {
       this.pic.pixels[i].b = max-this.pic.pixels[i].b;
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   public tornarCinza(){
@@ -168,6 +178,7 @@ export class ImageService {
     }
     this.pic.tipo = "P2"
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   public limiarizacao(val: number){
@@ -182,6 +193,7 @@ export class ImageService {
       this.pic.pixels[i].b = this.pic.pixels[i].b >= val ? this.pic.pixels[i].b : 0;
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   public binarizacao(val: number){
@@ -196,6 +208,7 @@ export class ImageService {
       this.pic.pixels[i].b = this.pic.pixels[i].b >= val ? this.pic.valMax : 0;
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   public compEscDin(c: number, gamma: number){
@@ -216,6 +229,7 @@ export class ImageService {
       this.pic.pixels[i].b = Math.round(S);
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   private getHistograma(){
@@ -282,6 +296,7 @@ export class ImageService {
       this.pixelsToRGB();
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   public RGBtoHSL(r, g, b){
@@ -358,20 +373,24 @@ export class ImageService {
       this.pic.pixels[index].b = cor;
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   public addRuidoLocal(x, y){
     let largura = this.pic.largura, cor = 0,index = y*largura+x
     let media = (this.pic.pixels[index].r + this.pic.pixels[index].g + this.pic.pixels[index].b)/3
     if(media <= 127) cor = 255
-    this.pic2.pixels[index].r = this.pic.pixels[index].r;
-    this.pic2.pixels[index].g = this.pic.pixels[index].g;
-    this.pic2.pixels[index].b = this.pic.pixels[index].b;
-    this.pic.pixels[index].r = cor
-    this.pic.pixels[index].g = cor
-    this.pic.pixels[index].b = cor
-    this.canUndo = true;
-    if(this.dct0 != undefined) this.dct0[index] = cor
+    for(let i = -1; i<2; i++){
+      for(let j = -1; j<2; j++){
+        index = (y+i)*largura+(x+j)
+        if(this.pic.pixels[index] != undefined){
+          this.pic.pixels[index].r = cor
+          this.pic.pixels[index].g = cor
+          this.pic.pixels[index].b = cor
+        }
+      }
+    }
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   private bubbleSort(arr, tam){
@@ -410,6 +429,7 @@ export class ImageService {
         this.pic.pixels[i].b = pixels[i];
       }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   public mediana(){
@@ -431,6 +451,7 @@ export class ImageService {
       this.pic.pixels[i].b = pixels[i];
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
 
@@ -453,6 +474,7 @@ export class ImageService {
       this.pic.pixels[i].b = pixels[i];
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
 
@@ -475,6 +497,7 @@ export class ImageService {
       this.pic.pixels[i].b = pixels[i];
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
 
@@ -497,9 +520,15 @@ export class ImageService {
       this.pic.pixels[i].b = pixels[i];
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
-
+  public lap(){
+    this.laplace()
+    this.lapOfGau(this.pic2)
+    this.isLaplace = true
+    this.canUndo = true
+  }
   public laplace(){
     if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
     let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
@@ -519,8 +548,31 @@ export class ImageService {
         this.pic.pixels[i].g = pixels[i];
         this.pic.pixels[i].b = pixels[i];
       }
-    this.canUndo = true;
     this.pictureStream.next(this.pic);
+  }
+
+  public lapOfGau(imagem: Imagem){
+    if(imagem.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = imagem.largura, altura = imagem.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j, value=0;
+        let mask = this.calcVizinho5x5(i, j, index, [0,0,-1,0,0,0,-1,-2,-1,0,-1,-2,16,-2,-1,0,-1,-2,-1,0,0,0,-1,0,0]); 
+        for(let aux = 0; aux<25; aux++) value+=mask[aux];
+        value = Math.abs(value);
+        pixels.push(Math.round(value));
+      }
+      let minmax = this.getMinMax(pixels)
+      for(let i=0; i<pixels.length; i++){
+        let pixelEq = 255*((pixels[i]-minmax[0])/(minmax[1]-minmax[0]));
+        this.pic.pixels[i].r = imagem.pixels[i].r
+        this.pic.pixels[i].g = imagem.pixels[i].g
+        this.pic.pixels[i].b = imagem.pixels[i].b
+        imagem.pixels[i].r = pixelEq;
+        imagem.pixels[i].g = pixelEq;
+        imagem.pixels[i].b = pixelEq;
+      }
+    this.lapOfGauStream.next(imagem);
   }
 
   public laplaceSharp(){
@@ -543,6 +595,7 @@ export class ImageService {
         this.pic.pixels[i].b = pixels[i];
       }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
 
@@ -578,6 +631,7 @@ export class ImageService {
     }
     this.magnitude = magnitude;
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   private getMinMax(arr){
@@ -934,9 +988,54 @@ export class ImageService {
    return mask2;
   }
 
+  private createSubImage(i0){
+    let novo: Imagem = new Imagem();
+    novo.tipo = this.pic.tipo
+    novo.valMax = this.pic.valMax
+    novo.largura = 8
+    novo.altura = 8
+    novo.pixels = []
+    for(let i=0; i<8; i++){
+      for(let j=0; j<8; j++){
+        let ind = i0+j
+        novo.pixels.push(new Pixel(this.pic.pixels[ind].r));
+      }
+      i0+=this.pic.largura
+    }
+    return novo
+  }
+
+  // public applyDct(){
+  //   if(this.pic.altura % 8 !=0 || this.pic.largura % 8!=0) return alert("imagem nao compativel")
+  //   let arri = [0], arrj = [0], indices = [], largura = this.pic.largura
+  //   for(let i = 1; i<this.pic.altura; i++) if(i%8 == 0) arri.push(i)
+  //   for(let j = 1; j<this.pic.largura; j++) if(j%8 == 0) arrj.push(j)
+  //   for(let i = 0; i<arri.length; i++){
+  //     for(let j = 0; j<arrj.length; j++){
+  //       indices.push(arri[i]*largura+arrj[j])
+  //     }
+  //   }
+  //   for(let aux = 0; aux<indices.length; aux++){
+  //     let ind = indices[aux]
+  //     let novo = this.createSubImage(ind)
+  //     this.dct(novo)
+  //     for(let i = 0; i<8; i++){
+  //       for(let j = 0; j<8; j++){
+  //         this.pic.pixels[ind+j].r = novo.pixels[i*8+j].r
+  //         this.pic.pixels[ind+j].g = novo.pixels[i*8+j].g
+  //         this.pic.pixels[ind+j].b = novo.pixels[i*8+j].b
+  //       }
+  //       ind+=this.pic.largura
+  //     }
+  //   }
+  //   this.canUndo = false;
+  //   this.pictureStream.next(this.pic);
+  // }
+
   public dct(){
-    const m=this.pic.altura, n=this.pic.largura, pi = 3.142857;
-    this.dct0 = [];
+    const pi = 3.142857,  m = this.pic.altura, n = this.pic.largura;
+    // const pi = 3.141592, m = this.pic.altura, n = this.pic.largura;
+    let dct0 = [];
     for(let i=0; i<m; i++){
       for(let j=0; j<n; j++){
         let ci, cj, sum = 0;
@@ -954,34 +1053,56 @@ export class ImageService {
             sum = sum + dct1;
           }
         }
-        // console.log(i*n+j)
-        this.dct0.push(ci*cj*sum);
-        //console.log([ci, cj, sum, ci*cj*sum])
+        dct0.push(ci*cj*sum);
       }
     }
-    // console.log(dct);
-    let minmax = this.getMinMax(this.dct0);
+    // let minmax = this.getMinMax(this.dct0);
     for(let i=0; i<this.pic.pixels.length; i++){
-      // let dct2 =Math.round(255*((this.dct0[i]-minmax[0])/(minmax[1]-minmax[0])));
-      let dct2 = this.dct0[i]
-      this.pic2.pixels[i].r = this.pic.pixels[i].r;
-      this.pic2.pixels[i].g = this.pic.pixels[i].g;
-      this.pic2.pixels[i].b = this.pic.pixels[i].b;
-      this.pic.pixels[i].r = dct2;
-      this.pic.pixels[i].g = dct2;
-      this.pic.pixels[i].b = dct2;
+      // let dct1 =Math.round(255*((this.dct0[i]-minmax[0])/(minmax[1]-minmax[0])));
+      let dct1 = dct0[i]
+      this.pic2.pixels[i].r = this.pic.pixels[i].r
+      this.pic2.pixels[i].g = this.pic.pixels[i].g
+      this.pic2.pixels[i].b = this.pic.pixels[i].b
+      this.pic.pixels[i].r = dct1;
+      this.pic.pixels[i].g = dct1;
+      this.pic.pixels[i].b = dct1;
     }
-    this.canUndo = true;
+    this.canUndo = true
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
+
+  // public applyIdct(){
+  //   if(this.pic.altura % 8 !=0 || this.pic.largura % 8!=0) return alert("imagem nao compativel")
+  //   let arri = [0], arrj = [0], indices = [], largura = this.pic.largura
+  //   for(let i = 1; i<this.pic.altura; i++) if(i%8 == 0) arri.push(i)
+  //   for(let j = 1; j<this.pic.largura; j++) if(j%8 == 0) arrj.push(j)
+  //   for(let i = 0; i<arri.length; i++){
+  //     for(let j = 0; j<arrj.length; j++){
+  //       indices.push(arri[i]*largura+arrj[j])
+  //     }
+  //   }
+  //   for(let aux = 0; aux<indices.length; aux++){
+  //     let ind = indices[aux]
+  //     let novo = this.createSubImage(ind)
+  //     this.idct(novo)
+  //     for(let i = 0; i<8; i++){
+  //       for(let j = 0; j<8; j++){
+  //         this.pic.pixels[ind+j].r = novo.pixels[i*8+j].r
+  //         this.pic.pixels[ind+j].g = novo.pixels[i*8+j].g
+  //         this.pic.pixels[ind+j].b = novo.pixels[i*8+j].b
+  //       }
+  //       ind+=this.pic.largura
+  //     }
+  //   }
+  //   this.canUndo = false;
+  //   this.pictureStream.next(this.pic);
+  // }
+
   public idct(){
-    const m=this.pic.altura, n=this.pic.largura, pi = 3.142857, idct0 = [];
-    // if(this.dct0 == undefined){
-    //   this.dct0 = []
-    //   for(let i=0; i< this.pic.pixels.length; i++){
-    //     this.dct0.push(this.pic.pixels[i].r)
-    //   }
-    // }
+    const pi = 3.142857, m = this.pic.altura, n = this.pic.largura;
+    // const pi = 3.141592, m = this.pic.altura, n = this.pic.largura;
+    let idct0 = [];
     for(let i=0; i<m; i++){
       for(let j=0; j<n; j++){
         let ci, cj, sum = 0;
@@ -997,26 +1118,21 @@ export class ImageService {
             let cosX = Math.cos((2*l+1)*j*pi/(2*n))
             let dct1 = ci*cj*this.pic.pixels[index].r * cosY * cosX;
             sum = sum + dct1; 
-            
           }
         }
         idct0.push(sum);
       }
     }
-    // console.log(idct0);
     let minmax = this.getMinMax(idct0);
     for(let i=0; i<this.pic.pixels.length; i++){
       let idct1 = Math.round(255*((idct0[i]-minmax[0])/(minmax[1]-minmax[0])))
-      idct0[i] = idct1
-      // let idct1 = idct0[i]
-      this.pic2.pixels[i].r = this.pic.pixels[i].r;
-      this.pic2.pixels[i].g = this.pic.pixels[i].g;
-      this.pic2.pixels[i].b = this.pic.pixels[i].b;
+      //let idct1 = idct0[i]
       this.pic.pixels[i].r = idct1;
       this.pic.pixels[i].g = idct1;
       this.pic.pixels[i].b = idct1;
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
   public getHue(){
@@ -1059,32 +1175,47 @@ export class ImageService {
       this.pic.pixels[i].b = this.hue[index].b;
     }
     this.canUndo = true;
+    this.isLaplace = false;
     this.pic.tipo = "P3"
     this.pictureStream.next(this.pic);
   }
-  public lapOfGau(){
-    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
-    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
-    for(let i=0; i<altura; i++)
-      for(let j=0; j<largura; j++){
-        let  index = i*largura+j, value=0;
-        let mask = this.calcVizinho5x5(i, j, index, [0,0,-1,0,0,0,-1,-2,-1,0,-1,-2,16,-2,-1,0,-1,-2,-1,0,0,0,-1,0,0]); 
-        for(let aux = 0; aux<25; aux++) value+=mask[aux];
-        value = Math.abs(value);
-        pixels.push(Math.round(value));
-      }
-      let minmax = this.getMinMax(pixels)
-      for(let i=0; i<pixels.length; i++){
-        let pixelEq = 255*((pixels[i]-minmax[0])/(minmax[1]-minmax[0]));
+  
+  public passaAlta(raio){
+    for(let i = 0; i<this.pic.altura; i++){
+      for(let j = 0; j<this.pic.altura; j++){
+        let index = i*this.pic.largura+j
         this.pic2.pixels[i].r = this.pic.pixels[i].r;
         this.pic2.pixels[i].g = this.pic.pixels[i].g;
         this.pic2.pixels[i].b = this.pic.pixels[i].b;
-        this.pic.pixels[i].r = pixelEq;
-        this.pic.pixels[i].g = pixelEq;
-        this.pic.pixels[i].b = pixelEq;
+        if(Math.sqrt((i*i)+(j*j))<raio){
+          this.pic.pixels[index].r = 0
+          this.pic.pixels[index].g = 0
+          this.pic.pixels[index].b = 0
+        }
       }
-    this.canUndo = true;
-    this.pictureStream.next(this.pic);
+    }
+    // this.canUndo = true
+    // this.pictureStream.next(this.pic);
+    this.idct()
+  }
+
+  public passaBaixa(raio){
+    for(let i = 0; i<this.pic.altura; i++){
+      for(let j = 0; j<this.pic.altura; j++){
+        let index = i*this.pic.largura+j
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+        if(Math.sqrt((i*i)+(j*j))>raio){
+          this.pic.pixels[index].r = 0
+          this.pic.pixels[index].g = 0
+          this.pic.pixels[index].b = 0
+        }
+      }
+    }
+    // this.canUndo = true
+    // this.pictureStream.next(this.pic);
+    this.idct()
   }
   public otsu(){
     let hist = this.getHistograma(), arr = Object.keys(hist), qtd = this.pic.pixels.length

@@ -11,6 +11,7 @@
             <button mat-menu-item [matMenuTriggerFor]="func1">Cor</button>
             <button mat-menu-item [matMenuTriggerFor]="func2">Calculos</button>
             <button mat-menu-item [matMenuTriggerFor]="func3">Ruídos</button>
+            <button mat-menu-item [matMenuTriggerFor]="func4">Transformada Cosseno</button>
         </mat-menu>
         
         <mat-menu #func1="matMenu">
@@ -20,6 +21,7 @@
             <br>
             <button mat-button color="accent" (click)="equalizarHistograma()" [disabled]="!servico.isLoaded">Equalizar histograma</button>
             <br>
+            <button mat-button color="accent" (click)="pseudoCores()" [disabled]="!servico.isLoaded">Pseudo cores</button>
             <button mat-menu-item [matMenuTriggerFor]="func11">Binarização e Limiarizaçao</button>
             <br>
             <button mat-menu-item [matMenuTriggerFor]="func12">Compressão de escala dinâmica</button>
@@ -37,7 +39,9 @@
                 (click)="$event.stopPropagation();"
             ></mat-slider><br>
             <button mat-button color="accent" (click)="binarizacao()" [disabled]="!servico.isLoaded">Binarização</button><br>
-            <button mat-button color="accent" (click)="limiarizacao()" [disabled]="!servico.isLoaded">Limiarização</button>
+            <button mat-button color="accent" (click)="limiarizacao()" [disabled]="!servico.isLoaded">Limiarização</button><br>
+            <button mat-button color="accent" (click)="otsuL()" [disabled]="!servico.isLoaded">otsu limiarização</button><br>
+            <button mat-button color="accent" (click)="otsuB()" [disabled]="!servico.isLoaded">otsu binarização</button>
         </mat-menu>
 
         <mat-menu #func12="matMenu">
@@ -80,6 +84,12 @@
             <button mat-button color="accent" (click)="laplaceSharp()" [disabled]="!servico.isLoaded">Realce laplaciano</button>
             <br>
             <button mat-button color="accent" (click)="sobel()" [disabled]="!servico.isLoaded">Sobel</button>
+            <br>
+            <button mat-button color="accent" (click)="pontoMin()" [disabled]="!servico.isLoaded">Ponto mínimo</button>
+            <br>
+            <button mat-button color="accent" (click)="pontoMax()" [disabled]="!servico.isLoaded">Ponto maximo</button>
+            <br> 
+            <button mat-button color="accent" (click)="pontoMed()" [disabled]="!servico.isLoaded">Ponto medio</button>
         </mat-menu>
 
         <mat-menu #func3="matMenu">
@@ -93,12 +103,34 @@
             color="accent"
             [(value)]="ruido"
             (click)="$event.stopPropagation();"
-        ></mat-slider><br>
-        <button mat-button color="accent" (click)="ruidoPreto()" [disabled]="!servico.isLoaded">Ruído preto</button><br>
-        <button mat-button color="accent" (click)="ruidoBranco()" [disabled]="!servico.isLoaded">Ruído branco</button><br>
-        <button mat-button color="accent" (click)="saltPepper()" [disabled]="!servico.isLoaded">Sal e pimenta</button>
+            ></mat-slider><br>
+            <button mat-button color="accent" (click)="ruidoPreto()" [disabled]="!servico.isLoaded">Ruído preto</button>
+            <br>
+            <button mat-button color="accent" (click)="ruidoBranco()" [disabled]="!servico.isLoaded">Ruído branco</button>
+            <br>
+            <button mat-button color="accent" (click)="saltPepper()" [disabled]="!servico.isLoaded">Sal e pimenta</button>
         </mat-menu>
-
+        <mat-menu #func4="matMenu">
+            <button mat-button [disabled]="true">Raio para as passadas</button>
+            <mat-slider
+                [disabled]="!servico.isLoaded"
+                [min] = "0"
+                [max]= "100"
+                [thumbLabel]="true"
+                [step]="1"
+                color="accent"
+                [(value)]="raioPassada"
+                (click)="$event.stopPropagation();">
+            </mat-slider>
+            <br>
+            <button mat-button color="accent" (click)="dct()" [disabled]="!servico.isLoaded">DCT</button>
+            <br>
+            <button mat-button color="accent" (click)="idct()" [disabled]="!servico.isLoaded">IDCT</button>
+            <br>
+            <button mat-button color="accent" (click)="passaBaixa()" [disabled]="!servico.isLoaded">Passa baixa</button>
+            <br>
+            <button mat-button color="accent" (click)="passaAlta()" [disabled]="!servico.isLoaded">Passa alta</button>
+        </mat-menu>
         <h1></h1>
         <a href="https://drive.google.com/drive/u/0/folders/1z9NXFhD-Ui1euSg91UHql3M6TMCIIfGE" target="_blank" button mat-stroked-button color="accent">
             PGMs de exemplo
@@ -125,12 +157,3 @@
     </div>
     <app-visual></app-visual>
 </div>
-
-<button mat-button color="accent" (click)="dct()">dct</button>
-<button mat-button color="accent" (click)="idct()">idct</button> 
-<button mat-button color="accent" (click)="pontoMin()">ponto min</button>
-<button mat-button color="accent" (click)="pontoMax()">ponto max</button> 
-<button mat-button color="accent" (click)="pontoMed()">ponto med</button>
-<button mat-button color="accent" (click)="pseudoCores()">pseudo cores</button>
-<button mat-button color="accent" (click)="LapOfGau()">LoG</button>
-<button mat-button color="accent" (click)="otsu()">otsu</button>

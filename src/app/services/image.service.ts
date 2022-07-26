@@ -69,6 +69,7 @@ export class ImageService {
   }
 
   upload(arquivo: File): Promise<boolean>{
+    this.isLaplace = false;
     return new Promise((resolve, reject)=>{
       //if(!['image/x-portable-graymap'].includes(arquivo.type)) reject(false);
       let leitor = new FileReader();
@@ -988,22 +989,22 @@ export class ImageService {
    return mask2;
   }
 
-  private createSubImage(i0){
-    let novo: Imagem = new Imagem();
-    novo.tipo = this.pic.tipo
-    novo.valMax = this.pic.valMax
-    novo.largura = 8
-    novo.altura = 8
-    novo.pixels = []
-    for(let i=0; i<8; i++){
-      for(let j=0; j<8; j++){
-        let ind = i0+j
-        novo.pixels.push(new Pixel(this.pic.pixels[ind].r));
-      }
-      i0+=this.pic.largura
-    }
-    return novo
-  }
+  // private createSubImage(i0){
+  //   let novo: Imagem = new Imagem();
+  //   novo.tipo = this.pic.tipo
+  //   novo.valMax = this.pic.valMax
+  //   novo.largura = 8
+  //   novo.altura = 8
+  //   novo.pixels = []
+  //   for(let i=0; i<8; i++){
+  //     for(let j=0; j<8; j++){
+  //       let ind = i0+j
+  //       novo.pixels.push(new Pixel(this.pic.pixels[ind].r));
+  //     }
+  //     i0+=this.pic.largura
+  //   }
+  //   return novo
+  // }
 
   // public applyDct(){
   //   if(this.pic.altura % 8 !=0 || this.pic.largura % 8!=0) return alert("imagem nao compativel")

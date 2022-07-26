@@ -21,6 +21,10 @@ export class HomeComponent implements OnInit {
   Cnumber: any = 1;
   Gamma: any = 1;
 
+teste(){
+  this.servico.teste();
+}
+
   converterRGB2HSL(r, g, b){
     let arr = this.servico.RGBtoHSL(r, g, b);
     this.textoH = arr[0];

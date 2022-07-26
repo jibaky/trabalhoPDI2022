@@ -31,6 +31,11 @@ export class ImageService {
 
   constructor() { }
 
+  teste(){
+    let doc = document.querySelector("mat-expansion-panel")
+    console.log(doc)
+  }
+
   public getNewPic(){
     let arr = [this.pic.tipo+'\n'+this.pic.largura+' '+this.pic.altura+'\n'+this.pic.valMax]
     if(this.pic.tipo == 'P2'){
@@ -943,7 +948,6 @@ export class ImageService {
     }
     else if(index == i*largura){//borda esquerda
       //console.log('teste5', 'index='+index, 'i='+i, 'j='+j, 'largura='+largura, '='+(i*largura));
-       console.log((i+2)*largura+(j), i, largura, j)
        mask2 = this.convol([
            this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j)].r,this.pic.pixels[(i-2)*largura+(j+1)].r,this.pic.pixels[(i-2)*largura+(j+2)].r,
            this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j)].r,this.pic.pixels[(i-1)*largura+(j+1)].r,this.pic.pixels[(i-1)*largura+(j+2)].r,

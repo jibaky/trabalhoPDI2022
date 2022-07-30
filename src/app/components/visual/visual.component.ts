@@ -14,7 +14,6 @@ export class VisualComponent {
   @ViewChild('drawR') myCanvasR: ElementRef;
   @ViewChild('drawG') myCanvasG: ElementRef;
   @ViewChild('drawB') myCanvasB: ElementRef;
-  @ViewChild('drawLap') myCanvasLap: ElementRef;
   @ViewChild('drawLoG') myCanvasLoG: ElementRef;
   textoR: any = 0;
   textoG: any = 0;
@@ -107,7 +106,6 @@ export class VisualComponent {
       this.drawOnCanvas(this.myCanvasR, updatedPicture, 1, 0, 0);
       this.drawOnCanvas(this.myCanvasG, updatedPicture, 0, 1, 0);
       this.drawOnCanvas(this.myCanvasB, updatedPicture, 0, 0, 1);
-      this.drawOnCanvas(this.myCanvasLap, updatedPicture)
     });
     this.servico.lapOfGauStream.pipe(
       filter((v)=> v != null)

@@ -31,11 +31,6 @@ export class ImageService {
 
   constructor() { }
 
-  teste(){
-    let doc = document.querySelector("mat-expansion-panel")
-    console.log(doc)
-  }
-
   public getNewPic(){
     let arr = [this.pic.tipo+'\n'+this.pic.largura+' '+this.pic.altura+'\n'+this.pic.valMax]
     if(this.pic.tipo == 'P2'){
@@ -1261,7 +1256,10 @@ export class ImageService {
     }
     let minmax = this.getMinMax(aux)
     for(let i=0; i<sigma.length; i++){
-      if(sigma[i][0] == minmax[1]) return sigma[i][1]
+      if(sigma[i][0] == minmax[1]){
+        alert("limiar: "+ sigma[i][1])
+        return sigma[i][1]
+      }
     }
   }
 }

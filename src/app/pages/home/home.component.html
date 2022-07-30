@@ -40,8 +40,8 @@
             ></mat-slider><br>
             <button mat-button color="accent" (click)="binarizacao()" [disabled]="!servico.isLoaded">Binarização</button><br>
             <button mat-button color="accent" (click)="limiarizacao()" [disabled]="!servico.isLoaded">Limiarização</button><br>
-            <button mat-button color="accent" (click)="otsuL()" [disabled]="!servico.isLoaded">otsu limiarização</button><br>
-            <button mat-button color="accent" (click)="otsuB()" [disabled]="!servico.isLoaded">otsu binarização</button>
+            <button mat-button color="accent" (click)="otsuL()" [disabled]="!servico.isLoaded">Otsu Limiarização</button><br>
+            <button mat-button color="accent" (click)="otsuB()" [disabled]="!servico.isLoaded">Otsu Binarização</button>
         </mat-menu>
 
         <mat-menu #func12="matMenu">
@@ -157,4 +157,3 @@
     </div>
     <app-visual></app-visual>
 </div>
-<button mat-button color="accent" (click)="teste()" >teste</button>

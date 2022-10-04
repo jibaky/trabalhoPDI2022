@@ -145,6 +145,22 @@ export class HomeComponent implements OnInit {
     this.servico.passaAlta(this.raioPassada);
   }
 
+  mediaGeo(){
+    this.servico.mediaGeo();
+  }
+
+  mediaHarm(){
+    this.servico.mediaHarm();
+  }
+
+  mediaContHarmPos(){
+    this.servico.mediaContHarm(1.5)
+  }
+
+  mediaContHarmNeg(){
+    this.servico.mediaContHarm(-1.5)
+  }
+
   ngOnInit(): void {
     this.servico.getHue();
   }

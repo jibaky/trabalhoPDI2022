@@ -433,6 +433,77 @@ export class ImageService {
     this.isLaplace = false;
     this.pictureStream.next(this.pic);
   }
+  public mediaGeo(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j, value=1;
+        let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
+        for(let aux = 0; aux<9; aux++) value*=mask[aux];
+        value = Math.pow(value, 1/mask.length);
+        pixels.push(Math.round(value));
+      }
+      for(let i = 0; i<pixels.length; i++){
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+        this.pic.pixels[i].r = pixels[i];
+        this.pic.pixels[i].g = pixels[i];
+        this.pic.pixels[i].b = pixels[i];
+      }
+    this.canUndo = true;
+    this.isLaplace = false;
+    this.pictureStream.next(this.pic);
+  }
+  public mediaHarm(){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j, value=0;
+        let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
+        for(let aux = 0; aux<9; aux++) value+= 1/mask[aux];
+        value = mask.length/value
+        pixels.push(Math.round(value));
+      }
+      for(let i = 0; i<pixels.length; i++){
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+        this.pic.pixels[i].r = pixels[i];
+        this.pic.pixels[i].g = pixels[i];
+        this.pic.pixels[i].b = pixels[i];
+      }
+    this.canUndo = true;
+    this.isLaplace = false;
+    this.pictureStream.next(this.pic);
+  }
+  public mediaContHarm(Q: number){
+    if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
+    let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
+    for(let i=0; i<altura; i++)
+      for(let j=0; j<largura; j++){
+        let  index = i*largura+j, value1=0, value2 = 0;
+        let mask = this.calcVizinho3x3(i, j, index, [1,1,1,1,1,1,1,1,1]); 
+        for(let aux = 0; aux<9; aux++){
+          value1+= Math.pow(mask[aux], Q+1);
+          value2+= Math.pow(mask[aux], Q)
+        }
+        pixels.push(Math.round(value1/value2));
+      }
+      for(let i = 0; i<pixels.length; i++){
+        this.pic2.pixels[i].r = this.pic.pixels[i].r;
+        this.pic2.pixels[i].g = this.pic.pixels[i].g;
+        this.pic2.pixels[i].b = this.pic.pixels[i].b;
+        this.pic.pixels[i].r = pixels[i];
+        this.pic.pixels[i].g = pixels[i];
+        this.pic.pixels[i].b = pixels[i];
+      }
+    this.canUndo = true;
+    this.isLaplace = false;
+    this.pictureStream.next(this.pic);
+  }
   public mediana(){
     if(this.pic.tipo == 'P3') return alert("Essa feature so foi implementada para imagens .pgm");
     let pixels = [], largura = this.pic.largura, altura = this.pic.altura;
